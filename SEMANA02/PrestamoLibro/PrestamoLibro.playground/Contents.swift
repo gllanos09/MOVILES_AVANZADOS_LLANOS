@@ -64,10 +64,18 @@ func leerFecha(_ mensaje: String) -> Date {
     formatter.dateFormat = "dd/MM/yyyy"
     formatter.locale = Locale(identifier: "es_PE")
 
+    let hoy = Calendar.current.startOfDay(for: Date())
+
     while true {
         print(mensaje, terminator: " ")
         if let input = readLine()?.trimmingCharacters(in: .whitespaces),
            let fecha = formatter.date(from: input) {
+
+            if fecha < hoy {
+                print("⚠️  La fecha no puede ser anterior a hoy (\(formatter.string(from: hoy))).")
+                continue
+            }
+
             return fecha
         }
         print("⚠️  Fecha inválida. Usa el formato dd/MM/yyyy (ej: 18/10/2026)")
