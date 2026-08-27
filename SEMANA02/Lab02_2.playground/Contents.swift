@@ -24,3 +24,6 @@ let promedio = (exaparcial) * parcial + (exatrabajo) * trabajo + (exafinal) * fi
 
 // Commit del calculo
 
+print ("Promedio final por pesos de \(alumno): \(promedio)")
+// Commit de mostrar los datos
+
