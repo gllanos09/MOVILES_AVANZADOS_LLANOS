@@ -221,7 +221,62 @@ func calcularMultaTotal(calendario: [FilaCalendario]) -> Double {
     return calendario.last?.acumulado ?? 0.0
 }
 
-// MARK: - Ejecución
+// MARK: - Fase 3: Resultados
+
+func mostrarResultados(prestamo: Prestamo, diasAtraso: Int, calendario: [FilaCalendario], multaTotal: Double, estado: String, situacion: String) {
+
+    let formatter = DateFormatter()
+    formatter.dateFormat = "dd/MM/yyyy"
+    formatter.locale = Locale(identifier: "es_PE")
+
+    let fechaLimite = calcularFechaLimite(fechaPrestamo: prestamo.fechaPrestamo, tipo: prestamo.tipoUsuario)
+
+    print("\n========================================")
+    print("     SISTEMA DE PRÉSTAMO DE LIBROS")
+    print("========================================")
+
+    print("\n--- DATOS DEL PRÉSTAMO ---")
+    print("Libro:              \(prestamo.tituloLibro)")
+    print("Tipo de usuario:    \(prestamo.tipoUsuario.rawValue)")
+    print("Fecha préstamo:     \(formatter.string(from: prestamo.fechaPrestamo))")
+    print("Fecha límite:       \(formatter.string(from: fechaLimite))")
+    print("Fecha devolución:   \(formatter.string(from: prestamo.fechaDevolucion))")
+    print("Fecha entrega real: \(formatter.string(from: prestamo.fechaEntregaReal))")
+
+    print("\n--- ESTADO ---")
+    print("Estado del libro:   \(estado)")
+    print("Días de atraso:     \(diasAtraso)")
+    print("Situación usuario:  \(situacion)")
+
+    if diasAtraso > 0 {
+        print("\n--- CALENDARIO DE MULTAS ---")
+        print("Día    Fecha          Multa día     Acumulado")
+        print(String(repeating: "-", count: 46))
+
+        for fila in calendario {
+            let dia       = "\(fila.dia)".padding(toLength: 6,  withPad: " ", startingAt: 0)
+            let fecha     = formatter.string(from: fila.fecha).padding(toLength: 14, withPad: " ", startingAt: 0)
+            let multaDia  = "S/ \(String(format: "%.2f", fila.multaDia))".padding(toLength: 13, withPad: " ", startingAt: 0)
+            let acumulado = "S/ \(String(format: "%.2f", fila.acumulado))"
+            print("\(dia) \(fecha) \(multaDia) \(acumulado)")
+        }
+
+        print(String(repeating: "-", count: 46))
+        let totalLabel = "MULTA TOTAL".padding(toLength: 34, withPad: " ", startingAt: 0)
+        print("\(totalLabel) S/ \(String(format: "%.2f", multaTotal))")
+
+    } else {
+        print("\n✅ Sin multas. Libro entregado a tiempo.")
+    }
+
+    if situacion == "Suspendido" {
+        print("\n⚠️  USUARIO SUSPENDIDO: excedió 10 días de atraso.")
+    }
+
+    print("\n========================================\n")
+}
+
+// Ejecución final
 let prestamo = ingresarDatos()
 
 let diasAtraso = calcularDiasAtraso(
@@ -239,23 +294,11 @@ let multaTotal = calcularMultaTotal(calendario: calendario)
 let estado = estadoLibro(fechaDevolucion: prestamo.fechaDevolucion, fechaEntregaReal: prestamo.fechaEntregaReal)
 let situacion = situacionUsuario(diasAtraso: diasAtraso)
 
-let formatter = DateFormatter()
-formatter.dateFormat = "dd/MM/yyyy"
-formatter.locale = Locale(identifier: "es_PE")
-
-print("\n✅ Datos ingresados correctamente.")
-print("Libro: \(prestamo.tituloLibro)")
-print("Usuario: \(prestamo.tipoUsuario.rawValue)")
-print("Días de atraso: \(diasAtraso)")
-print("Estado libro: \(estado)")
-print("Situación usuario: \(situacion)")
-
-if diasAtraso > 0 {
-    print("\nDía  Fecha        Multa día  Acumulado")
-    for fila in calendario {
-        print("  \(fila.dia)    \(formatter.string(from: fila.fecha))   \(String(format: "%.2f", fila.multaDia))       \(String(format: "%.2f", fila.acumulado))")
-    }
-    print("Multa total: S/ \(String(format: "%.2f", multaTotal))")
-} else {
-    print("\n✅ Sin multas. Libro entregado a tiempo.")
-}
+mostrarResultados(
+    prestamo: prestamo,
+    diasAtraso: diasAtraso,
+    calendario: calendario,
+    multaTotal: multaTotal,
+    estado: estado,
+    situacion: situacion
+)
