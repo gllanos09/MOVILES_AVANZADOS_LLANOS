@@ -19,3 +19,8 @@ print ("Nota del Examen Final")
 let exafinal = Double(readLine() ?? "") ?? 0
 
 // Commit del ingreso de datos
+
+let promedio = (exaparcial) * parcial + (exatrabajo) * trabajo + (exafinal) * final
+
+// Commit del calculo
+
