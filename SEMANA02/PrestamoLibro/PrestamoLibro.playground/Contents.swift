@@ -7,6 +7,7 @@ enum TipoUsuario: String {
     case alumno = "Alumno"
     case docente = "Docente"
     case administrador = "Administrador"
+    case coordinador = "Coordinador"
 }
 
 // Entidad Prestamo
@@ -24,6 +25,7 @@ func diasMaximos(_ tipo: TipoUsuario) -> Int {
     case .alumno: return 7
     case .docente: return 15
     case .administrador: return 10
+    case .coordinador: return 15
     }
 }
 
@@ -44,14 +46,16 @@ func leerTipoUsuario() -> TipoUsuario {
     print("1. Alumno")
     print("2. Docente")
     print("3. Administrador")
+    print("4. Coordinador")
 
     while true {
-        print("Selecciona (1-3):", terminator: " ")
+        print("Selecciona (1-4):", terminator: " ")
         if let input = readLine()?.trimmingCharacters(in: .whitespaces) {
             switch input {
             case "1": return .alumno
             case "2": return .docente
             case "3": return .administrador
+            case "4": return .coordinador
             default: print("⚠️  Opción inválida. Ingresa de nuevo.")
             }
         }
@@ -170,6 +174,7 @@ func multaBase(_ tipo: TipoUsuario) -> Double {
     case .alumno: return 1.50
     case .docente: return 2.00
     case .administrador: return 3.00
+    case .coordinador: return 4.00
     }
 }
 
@@ -177,8 +182,9 @@ func multaBase(_ tipo: TipoUsuario) -> Double {
 func multaPorDia(dia: Int, tipo: TipoUsuario) -> Double {
     let base = multaBase(tipo)
     switch dia {
-    case 1...3: return base
-    case 4...6: return base * 1.5
+    case 1...3: return base * 0
+    case 4...6: return base * 1.25
+    case 7...10: return base * 1.5
     default:    return base * 2.0
     }
 }
@@ -190,7 +196,7 @@ func estadoLibro(fechaDevolucion: Date, fechaEntregaReal: Date) -> String {
 
 // Situación del usuario
 func situacionUsuario(diasAtraso: Int) -> String {
-    return diasAtraso > 10 ? "Suspendido" : "Habilitado"
+    return diasAtraso > 20 ? "Suspendido" : "Habilitado"
 }
 
 // Estructura fila calendario
@@ -278,7 +284,11 @@ func mostrarResultados(prestamo: Prestamo, diasAtraso: Int, calendario: [FilaCal
     }
 
     if situacion == "Suspendido" {
-        print("\n⚠️  USUARIO SUSPENDIDO: excedió 10 días de atraso.")
+        print("\n⚠️  USUARIO SUSPENDIDO: excedió 20 días de atraso.")
+    }
+    
+    if diasAtraso <= 3 {
+        print("\n ¡Felicidades! No tendrás que pagar ninguna multa.")
     }
 
     print("\n========================================\n")
