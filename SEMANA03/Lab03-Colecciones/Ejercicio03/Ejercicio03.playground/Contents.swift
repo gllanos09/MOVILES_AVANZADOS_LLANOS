@@ -1,4 +1,4 @@
-// Desarrollado por: [TU NOMBRE]
+// Desarrollado por: Gabriel Llanos
 import Foundation
 
 // ===== EJEMPLO RESUELTO =====
