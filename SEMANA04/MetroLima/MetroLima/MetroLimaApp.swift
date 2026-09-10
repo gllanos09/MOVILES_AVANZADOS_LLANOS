@@ -847,6 +847,156 @@ func opcionComoLlegar() {
     buscarRuta(origen: origen, destino: destino)
 }
 
+// ─── HISTORIAL DE CONVERSACIÓN ───────────────────────────────
+var historial: [[String: String]] = []
+
+// ─── LLAMADA A ANTHROPIC API ─────────────────────────────────
+// ─── LLAMADA A GEMINI API ────────────────────────────────────
+func preguntarIA(_ pregunta: String) {
+    // Agregar pregunta al historial
+    historial.append(["role": "user", "content": pregunta])
+
+    guard let apiKey = ProcessInfo.processInfo.environment["GEMINI_API_KEY"],
+          !apiKey.isEmpty else {
+        print("❌ No se encontró la API Key. Configura GEMINI_API_KEY.")
+        return
+    }
+
+    // Construir el system prompt con contexto del JSON
+    let systemPrompt = """
+    Eres un asistente experto en el Metro de Lima y Callao.
+    Responde preguntas sobre líneas, estaciones, rutas y lugares cercanos.
+    Basa tus respuestas ÚNICAMENTE en estos datos reales del sistema:
+
+    \(jsonString)
+
+    Reglas:
+    - Sé conciso y directo.
+    - Si una estación no está operativa, indícalo claramente.
+    - Si no tienes información suficiente, dilo honestamente.
+    - Responde siempre en español.
+    - No inventes estaciones ni datos que no estén en el JSON.
+    """
+
+    // Construir el historial en formato Gemini
+    var contents: [[String: Any]] = []
+
+    // System prompt como primer mensaje del usuario
+    contents.append([
+        "role": "user",
+        "parts": [["text": systemPrompt]]
+    ])
+    contents.append([
+        "role": "model",
+        "parts": [["text": "Entendido. Soy tu asistente experto en el Metro de Lima. ¿En qué puedo ayudarte?"]]
+    ])
+
+    // Agregar historial de conversación
+    for mensaje in historial {
+        let role = mensaje["role"] == "user" ? "user" : "model"
+        let content = mensaje["content"] ?? ""
+        contents.append([
+            "role": role,
+            "parts": [["text": content]]
+        ])
+    }
+
+    let body: [String: Any] = [
+        "contents": contents,
+        "generationConfig": [
+            "maxOutputTokens": 1024,
+            "temperature": 0.3
+        ]
+    ]
+
+    let urlString = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=\(apiKey)"
+
+    guard let url = URL(string: urlString) else {
+        print("❌ URL inválida.")
+        return
+    }
+
+    guard let bodyData = try? JSONSerialization.data(withJSONObject: body) else {
+        print("❌ Error al construir el request.")
+        return
+    }
+
+    // Configurar el request
+    var request = URLRequest(url: url)
+    request.httpMethod = "POST"
+    request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+    request.httpBody = bodyData
+
+    print("\n🤖 Consultando a la IA...\n")
+
+    // Semáforo para esperar respuesta sincrónica
+    let semaphore = DispatchSemaphore(value: 0)
+    var respuestaFinal = ""
+
+    let task = URLSession.shared.dataTask(with: request) { data, response, error in
+        defer { semaphore.signal() }
+
+        if let error = error {
+            print("❌ Error de conexión: \(error.localizedDescription)")
+            return
+        }
+
+        guard let data = data else {
+            print("❌ No se recibió respuesta.")
+            return
+        }
+
+        guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+            print("❌ Respuesta inválida de la API.")
+            return
+        }
+
+        // Verificar error de la API
+        if let error = json["error"] as? [String: Any],
+           let mensaje = error["message"] as? String {
+            print("❌ Error de API: \(mensaje)")
+            return
+        }
+
+        // Extraer la respuesta de Gemini
+        guard let candidates = json["candidates"] as? [[String: Any]],
+              let primero = candidates.first,
+              let content = primero["content"] as? [String: Any],
+              let parts = content["parts"] as? [[String: Any]],
+              let primerPart = parts.first,
+              let texto = primerPart["text"] as? String else {
+            print("❌ No se pudo extraer la respuesta.")
+            return
+        }
+
+        respuestaFinal = texto
+    }
+
+    task.resume()
+    semaphore.wait()
+
+    if !respuestaFinal.isEmpty {
+        historial.append(["role": "assistant", "content": respuestaFinal])
+        print("🤖 \(respuestaFinal)")
+    }
+}
+// ─── OPCIÓN PREGUNTA LIBRE ───────────────────────────────────
+func opcionPreguntaLibre() {
+    print("\nEscribe tu pregunta (o 'volver' para regresar al menú):")
+    print("→ ", terminator: "")
+    let pregunta = readLine() ?? ""
+
+    guard !pregunta.isEmpty else {
+        print("⚠️  No ingresaste nada.")
+        return
+    }
+    guard normalizar(pregunta) != "volver" else {
+        return
+    }
+
+    preguntarIA(pregunta)
+}
+
 // ─── MENÚ PRINCIPAL ──────────────────────────────────────────
 func mostrarMenu() {
     print("\n══════════════════════════════════════════")
@@ -874,7 +1024,7 @@ func iniciar() {
 
         switch input {
         case "1":
-            print("\n🤖 Próximamente — Integración con IA")
+            opcionPreguntaLibre()
         case "2":
             submenuLineas()
         case "3":
