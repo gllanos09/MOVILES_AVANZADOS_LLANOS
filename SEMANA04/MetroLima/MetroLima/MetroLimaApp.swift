@@ -531,3 +531,40 @@ let jsonString = """
   ]
 }
 """
+
+// ─── NORMALIZACIÓN DE TEXTO ──────────────────────────────────
+func normalizar(_ texto: String) -> String {
+    let caracteresBase = [
+        "á": "a", "é": "e", "í": "i", "ó": "o", "ú": "u",
+        "Á": "a", "É": "e", "Í": "i", "Ó": "o", "Ú": "u",
+        "ñ": "n", "Ñ": "n", "ü": "u", "Ü": "u"
+    ]
+    var resultado = texto.lowercased()
+    for (con, sin) in caracteresBase {
+        resultado = resultado.replacingOccurrences(of: con, with: sin)
+    }
+    return resultado.trimmingCharacters(in: .whitespaces)
+}
+
+// ─── PARSEO DEL JSON ─────────────────────────────────────────
+var lineas: [[String: Any]] = []
+
+func cargarDatos() {
+    guard let data = jsonString.data(using: .utf8) else {
+        print("Error: no se pudo convertir el JSON a datos.")
+        return
+    }
+    guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+        print("Error: JSON inválido.")
+        return
+    }
+    guard let lineasJSON = json["lineas"] as? [[String: Any]] else {
+        print("Error: no se encontraron líneas en el JSON.")
+        return
+    }
+    lineas = lineasJSON
+    print("✅ Datos cargados: \(lineas.count) líneas encontradas.")
+}
+
+// ─── INICIO ──────────────────────────────────────────────────
+cargarDatos()
