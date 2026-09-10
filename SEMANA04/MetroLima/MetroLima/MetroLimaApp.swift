@@ -767,7 +767,7 @@ func submenuLineas() {
     }
 
     let linea = lineas[opcion - 1]
-    let nombreLinea = linea["nombre"] as? String ?? ""
+    _ = linea["nombre"] as? String ?? ""
     let estaciones  = linea["estaciones"] as? [[String: Any]] ?? []
 
     mostrarInfoLinea(linea)
@@ -850,7 +850,19 @@ func opcionComoLlegar() {
 // ─── HISTORIAL DE CONVERSACIÓN ───────────────────────────────
 var historial: [[String: String]] = []
 
-// ─── LLAMADA A ANTHROPIC API ─────────────────────────────────
+// ─── MANEJO DE SIGINT (Ctrl+C) ───────────────────────────────
+func configurarSIGINT() {
+    signal(SIGINT) { _ in
+        print("\n\n¿Seguro que deseas salir? (s/n): ", terminator: "")
+        let respuesta = readLine() ?? ""
+        if respuesta.lowercased() == "s" {
+            print("\n👋 ¡Hasta luego! Gracias por usar Metro de Lima.")
+            exit(0)
+        } else {
+            print("\n↩️  Regresando al menú...")
+        }
+    }
+}
 // ─── LLAMADA A GEMINI API ────────────────────────────────────
 func preguntarIA(_ pregunta: String) {
     // Agregar pregunta al historial
@@ -1014,6 +1026,7 @@ func mostrarMenu() {
 
 // ─── LOOP PRINCIPAL ──────────────────────────────────────────
 func iniciar() {
+    configurarSIGINT()
     cargarDatos()
     print("\nBienvenido al Metro de Lima 🚇")
 
