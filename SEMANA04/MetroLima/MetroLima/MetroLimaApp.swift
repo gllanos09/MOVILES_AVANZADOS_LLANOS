@@ -568,3 +568,122 @@ func cargarDatos() {
 
 // ─── INICIO ──────────────────────────────────────────────────
 cargarDatos()
+
+// ─── BÚSQUEDA DE ESTACIONES ──────────────────────────────────
+func buscarEstacion(_ termino: String) -> [[String: Any]] {
+    let terminoNorm = normalizar(termino)
+    var resultados: [[String: Any]] = []
+
+    for linea in lineas {
+        guard let estaciones = linea["estaciones"] as? [[String: Any]] else { continue }
+        for estacion in estaciones {
+            let nombre = estacion["nombre"] as? String ?? ""
+            let distrito = estacion["distrito"] as? String ?? ""
+            let referencias = estacion["referencias"] as? [String] ?? []
+
+            // Buscar por nombre
+            if normalizar(nombre).contains(terminoNorm) {
+                resultados.append(estacion)
+                continue
+            }
+            // Buscar por distrito
+            if normalizar(distrito).contains(terminoNorm) {
+                resultados.append(estacion)
+                continue
+            }
+            // Buscar por referencias
+            for ref in referencias {
+                if normalizar(ref).contains(terminoNorm) {
+                    resultados.append(estacion)
+                    break
+                }
+            }
+        }
+    }
+    return resultados
+}
+
+// ─── OBTENER LÍNEA DE UNA ESTACIÓN ───────────────────────────
+func obtenerLinea(deEstacion idEstacion: String) -> [String: Any]? {
+    for linea in lineas {
+        guard let estaciones = linea["estaciones"] as? [[String: Any]] else { continue }
+        for estacion in estaciones {
+            if let id = estacion["id"] as? String, id == idEstacion {
+                return linea
+            }
+        }
+    }
+    return nil
+}
+
+// ─── BUSCAR RUTA ─────────────────────────────────────────────
+func buscarRuta(origen: String, destino: String) {
+    let resultadosOrigen = buscarEstacion(origen)
+    let resultadosDestino = buscarEstacion(destino)
+
+    guard !resultadosOrigen.isEmpty else {
+        print("⚠️  No encontré la estación de origen: \(origen)")
+        return
+    }
+    guard !resultadosDestino.isEmpty else {
+        print("⚠️  No encontré la estación de destino: \(destino)")
+        return
+    }
+
+    let estOrigen = resultadosOrigen[0]
+    let estDestino = resultadosDestino[0]
+
+    let idOrigen = estOrigen["id"] as? String ?? ""
+    let idDestino = estDestino["id"] as? String ?? ""
+    let nombreOrigen = estOrigen["nombre"] as? String ?? ""
+    let nombreDestino = estDestino["nombre"] as? String ?? ""
+
+    let lineaOrigen = idOrigen.components(separatedBy: "-")[0]
+    let lineaDestino = idDestino.components(separatedBy: "-")[0]
+
+    print("\n📍 Origen:  \(nombreOrigen)")
+    print("📍 Destino: \(nombreDestino)")
+
+    if lineaOrigen == lineaDestino {
+        // Misma línea
+        guard let linea = obtenerLinea(deEstacion: idOrigen),
+              let estaciones = linea["estaciones"] as? [[String: Any]],
+              let nombreLinea = linea["nombre"] as? String else { return }
+
+        let ordenOrigen = estOrigen["orden"] as? Int ?? 0
+        let ordenDestino = estDestino["orden"] as? Int ?? 0
+        let min = Swift.min(ordenOrigen, ordenDestino)
+        let max = Swift.max(ordenOrigen, ordenDestino)
+        let intermedias = estaciones.filter {
+            let orden = $0["orden"] as? Int ?? 0
+            return orden > min && orden < max
+        }
+
+        print("\n🚇 Toma la \(nombreLinea)")
+        print("   Estaciones intermedias: \(intermedias.count)")
+        if !intermedias.isEmpty {
+            for est in intermedias {
+                let nombre = est["nombre"] as? String ?? ""
+                print("   → \(nombre)")
+            }
+        }
+    } else {
+        // Distinta línea — buscar estaciones cercanas
+        let cercanas = estOrigen["estaciones_cercanas"] as? [[String: Any]] ?? []
+        if !cercanas.isEmpty {
+            print("\n🔀 No hay transbordo directo entre líneas.")
+            for cercana in cercanas {
+                let nombre = cercana["estacion"] as? String ?? ""
+                let linea = cercana["linea"] as? String ?? ""
+                let distancia = cercana["distancia_metros"] as? Int ?? 0
+                let nota = cercana["nota"] as? String ?? ""
+                print("   Estación cercana: \(nombre) (\(linea)) — \(distancia)m")
+                print("   Nota: \(nota)")
+            }
+        } else {
+            print("\n🔀 Las estaciones están en líneas distintas.")
+            print("   Por ahora no hay conexión directa entre ellas.")
+            print("   Usa la opción 1 para preguntarle a la IA cómo llegar.")
+        }
+    }
+}
