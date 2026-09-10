@@ -566,9 +566,6 @@ func cargarDatos() {
     print("✅ Datos cargados: \(lineas.count) líneas encontradas.")
 }
 
-// ─── INICIO ──────────────────────────────────────────────────
-cargarDatos()
-
 // ─── BÚSQUEDA DE ESTACIONES ──────────────────────────────────
 func buscarEstacion(_ termino: String) -> [[String: Any]] {
     let terminoNorm = normalizar(termino)
@@ -687,3 +684,212 @@ func buscarRuta(origen: String, destino: String) {
         }
     }
 }
+
+// ─── MOSTRAR ESTACIÓN ────────────────────────────────────────
+func mostrarEstacion(_ estacion: [String: Any], linea: String = "") {
+    let nombre    = estacion["nombre"]   as? String ?? ""
+    let distrito  = estacion["distrito"] as? String ?? ""
+    let estado    = estacion["estado"]   as? String ?? ""
+    let orden     = estacion["orden"]    as? Int    ?? 0
+    let refs      = estacion["referencias"] as? [String] ?? []
+    let cercanas  = estacion["estaciones_cercanas"] as? [[String: Any]] ?? []
+
+    var estadoIcon = ""
+    switch estado {
+    case "operativa":       estadoIcon = "✅ Operativa"
+    case "en_construccion": estadoIcon = "⚠️  En construcción"
+    case "planificada":     estadoIcon = "📋 Planificada"
+    default:                estadoIcon = estado
+    }
+
+    print("\n  Estación #\(orden): \(nombre)")
+    if !linea.isEmpty { print("  Línea:    \(linea)") }
+    print("  Distrito: \(distrito)")
+    print("  Estado:   \(estadoIcon)")
+    if !refs.isEmpty {
+        print("  Cerca de: \(refs.joined(separator: ", "))")
+    }
+    if !cercanas.isEmpty {
+        for c in cercanas {
+            let cNombre = c["estacion"] as? String ?? ""
+            let cLinea  = c["linea"]    as? String ?? ""
+            let cDist   = c["distancia_metros"] as? Int ?? 0
+            let cNota   = c["nota"]     as? String ?? ""
+            print("  Conexión: \(cNombre) (\(cLinea)) — \(cDist)m — \(cNota)")
+        }
+    }
+}
+
+// ─── MOSTRAR LÍNEA ───────────────────────────────────────────
+func mostrarInfoLinea(_ linea: [String: Any]) {
+    let nombre    = linea["nombre"]          as? String ?? ""
+    let color     = linea["color"]           as? String ?? ""
+    let tipo      = linea["tipo"]            as? String ?? ""
+    let inicio    = linea["inicio"]          as? String ?? ""
+    let fin       = linea["fin"]             as? String ?? ""
+    let horarioS  = linea["horario_semana"]  as? String ?? ""
+    let horarioD  = linea["horario_domingo"] as? String ?? ""
+    let tarifa    = linea["tarifa"]          as? Double ?? 0.0
+    let estaciones = linea["estaciones"]     as? [[String: Any]] ?? []
+    let operativas = estaciones.filter { $0["estado"] as? String == "operativa" }.count
+
+    print("\n══════════════════════════════════════════")
+    print("  \(nombre) — \(color)")
+    print("══════════════════════════════════════════")
+    print("  Tipo:       \(tipo)")
+    print("  Recorrido:  \(inicio) → \(fin)")
+    print("  Horario:    L-S \(horarioS) | Dom \(horarioD)")
+    print("  Tarifa:     S/. \(tarifa)")
+    print("  Estaciones: \(estaciones.count) total — \(operativas) operativas")
+    print("══════════════════════════════════════════")
+}
+
+// ─── SUBMENÚ LÍNEAS ──────────────────────────────────────────
+func submenuLineas() {
+    print("\n¿De qué línea deseas ver las estaciones?")
+    for (i, linea) in lineas.enumerated() {
+        let nombre = linea["nombre"] as? String ?? ""
+        let color  = linea["color"]  as? String ?? ""
+        print("  \(i + 1). \(nombre) (\(color))")
+    }
+    print("  0. Volver")
+    print("\nOpción: ", terminator: "")
+
+    let input = readLine() ?? ""
+    guard let opcion = Int(input) else {
+        print("⚠️  Opción inválida.")
+        return
+    }
+    if opcion == 0 { return }
+    guard opcion >= 1 && opcion <= lineas.count else {
+        print("⚠️  Opción fuera de rango.")
+        return
+    }
+
+    let linea = lineas[opcion - 1]
+    let nombreLinea = linea["nombre"] as? String ?? ""
+    let estaciones  = linea["estaciones"] as? [[String: Any]] ?? []
+
+    mostrarInfoLinea(linea)
+    print("\n  Estaciones:")
+    for estacion in estaciones {
+        let nombre = estacion["nombre"] as? String ?? ""
+        let estado = estacion["estado"] as? String ?? ""
+        let orden  = estacion["orden"]  as? Int    ?? 0
+        var icon   = ""
+        switch estado {
+        case "operativa":       icon = "✅"
+        case "en_construccion": icon = "⚠️ "
+        case "planificada":     icon = "📋"
+        default:                icon = "  "
+        }
+        print("  \(icon) \(orden). \(nombre)")
+    }
+}
+
+// ─── OPCIÓN BUSCAR ESTACIÓN ──────────────────────────────────
+func opcionBuscarEstacion() {
+    print("\nIngresa el nombre o lugar a buscar: ", terminator: "")
+    let termino = readLine() ?? ""
+    guard !termino.isEmpty else {
+        print("⚠️  No ingresaste nada.")
+        return
+    }
+    let resultados = buscarEstacion(termino)
+    if resultados.isEmpty {
+        print("❌ No encontré estaciones para: \"\(termino)\"")
+        return
+    }
+    print("\n🔍 Resultados para \"\(termino)\": \(resultados.count) encontrada(s)")
+    for estacion in resultados {
+        let idEst = estacion["id"] as? String ?? ""
+        let lineaId = idEst.components(separatedBy: "-")[0]
+        let nombreLinea = lineas.first {
+            $0["id"] as? String == lineaId
+        }.flatMap { $0["nombre"] as? String } ?? ""
+        mostrarEstacion(estacion, linea: nombreLinea)
+    }
+}
+
+// ─── OPCIÓN INFO LÍNEA ───────────────────────────────────────
+func opcionInfoLinea() {
+    print("\n¿De qué línea deseas información?")
+    for (i, linea) in lineas.enumerated() {
+        let nombre = linea["nombre"] as? String ?? ""
+        print("  \(i + 1). \(nombre)")
+    }
+    print("  0. Volver")
+    print("\nOpción: ", terminator: "")
+
+    let input = readLine() ?? ""
+    guard let opcion = Int(input), opcion >= 1, opcion <= lineas.count else {
+        if input == "0" { return }
+        print("⚠️  Opción inválida.")
+        return
+    }
+    mostrarInfoLinea(lineas[opcion - 1])
+}
+
+// ─── OPCIÓN CÓMO LLEGAR ──────────────────────────────────────
+func opcionComoLlegar() {
+    print("\nEstación de origen: ", terminator: "")
+    let origen = readLine() ?? ""
+    guard !origen.isEmpty else {
+        print("⚠️  No ingresaste el origen.")
+        return
+    }
+    print("Estación de destino: ", terminator: "")
+    let destino = readLine() ?? ""
+    guard !destino.isEmpty else {
+        print("⚠️  No ingresaste el destino.")
+        return
+    }
+    buscarRuta(origen: origen, destino: destino)
+}
+
+// ─── MENÚ PRINCIPAL ──────────────────────────────────────────
+func mostrarMenu() {
+    print("\n══════════════════════════════════════════")
+    print("       METRO DE LIMA — CONSULTAS          ")
+    print("══════════════════════════════════════════")
+    print("  1. Pregunta libre (IA)")
+    print("  2. Ver estaciones por línea")
+    print("  3. Buscar estación o lugar")
+    print("  4. Información de una línea")
+    print("  5. ¿Cómo llegar a...?")
+    print("  0. Salir")
+    print("══════════════════════════════════════════")
+    print("Opción: ", terminator: "")
+}
+
+// ─── LOOP PRINCIPAL ──────────────────────────────────────────
+func iniciar() {
+    cargarDatos()
+    print("\nBienvenido al Metro de Lima 🚇")
+
+    var continuar = true
+    while continuar {
+        mostrarMenu()
+        let input = readLine() ?? ""
+
+        switch input {
+        case "1":
+            print("\n🤖 Próximamente — Integración con IA")
+        case "2":
+            submenuLineas()
+        case "3":
+            opcionBuscarEstacion()
+        case "4":
+            opcionInfoLinea()
+        case "5":
+            opcionComoLlegar()
+        case "0":
+            continuar = false
+            print("\n👋 ¡Hasta luego! Gracias por usar Metro de Lima.")
+        default:
+            print("⚠️  Opción no válida. Elige entre 0 y 5.")
+        }
+    }
+}
+
+iniciar()
