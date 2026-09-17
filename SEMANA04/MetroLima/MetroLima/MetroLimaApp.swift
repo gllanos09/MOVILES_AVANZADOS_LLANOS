@@ -1671,53 +1671,168 @@ func buscarRuta(origen: String, destino: String) {
     let idDestino = estDestino["id"] as? String ?? ""
     let nombreOrigen = estOrigen["nombre"] as? String ?? ""
     let nombreDestino = estDestino["nombre"] as? String ?? ""
-
-    let lineaOrigen = idOrigen.components(separatedBy: "-")[0]
-    let lineaDestino = idDestino.components(separatedBy: "-")[0]
+    let estadoOrigen = estOrigen["estado"] as? String ?? ""
+    let estadoDestino = estDestino["estado"] as? String ?? ""
+    let lineaIdOrigen = idOrigen.components(separatedBy: "-")[0]
+    let lineaIdDestino = idDestino.components(separatedBy: "-")[0]
 
     print("\n📍 Origen:  \(nombreOrigen)")
     print("📍 Destino: \(nombreDestino)")
 
-    if lineaOrigen == lineaDestino {
-        // Misma línea
+    // Validar estado de origen y destino
+    if estadoOrigen != "operativa" {
+        let icon = estadoOrigen == "en_construccion" ? "⚠️ " : "📋"
+        print("\n\(icon) La estación de origen '\(nombreOrigen)' no está operativa actualmente.")
+        print("   Estado: \(estadoOrigen == "en_construccion" ? "En construcción" : "Planificada")")
+        print("   Se mostrará la ruta como referencia futura.\n")
+    }
+    if estadoDestino != "operativa" {
+        let icon = estadoDestino == "en_construccion" ? "⚠️ " : "📋"
+        print("\n\(icon) La estación de destino '\(nombreDestino)' no está operativa actualmente.")
+        print("   Estado: \(estadoDestino == "en_construccion" ? "En construcción" : "Planificada")")
+        print("   Se mostrará la ruta como referencia futura.\n")
+    }
+
+    // ── CASO 1: Misma línea ──────────────────────────────────
+    if lineaIdOrigen == lineaIdDestino {
         guard let linea = obtenerLinea(deEstacion: idOrigen),
               let estaciones = linea["estaciones"] as? [[String: Any]],
               let nombreLinea = linea["nombre"] as? String else { return }
 
-        let ordenOrigen = estOrigen["orden"] as? Int ?? 0
+        let ordenOrigen  = estOrigen["orden"]  as? Int ?? 0
         let ordenDestino = estDestino["orden"] as? Int ?? 0
-        let min = Swift.min(ordenOrigen, ordenDestino)
-        let max = Swift.max(ordenOrigen, ordenDestino)
+        let minOrden = Swift.min(ordenOrigen, ordenDestino)
+        let maxOrden = Swift.max(ordenOrigen, ordenDestino)
+
         let intermedias = estaciones.filter {
             let orden = $0["orden"] as? Int ?? 0
-            return orden > min && orden < max
+            return orden > minOrden && orden < maxOrden
         }
 
-        print("\n🚇 Toma la \(nombreLinea)")
-        print("   Estaciones intermedias: \(intermedias.count)")
-        if !intermedias.isEmpty {
-            for est in intermedias {
+        // Verificar estaciones no operativas en el recorrido
+        let noOperativas = intermedias.filter { $0["estado"] as? String != "operativa" }
+
+        let totalEstaciones = abs(ordenDestino - ordenOrigen)
+        let tiempoEstimado  = totalEstaciones * 2
+
+        print("\n🚇 Ruta directa en \(nombreLinea)")
+        print("   Estaciones a recorrer: \(totalEstaciones)")
+        print("   Tiempo estimado:       ~\(tiempoEstimado) min")
+
+        if !noOperativas.isEmpty {
+            print("\n   ⚠️  Atención: \(noOperativas.count) estación(es) en este recorrido no están operativas:")
+            for est in noOperativas {
                 let nombre = est["nombre"] as? String ?? ""
-                print("   → \(nombre)")
+                let estado = est["estado"] as? String ?? ""
+                let label  = estado == "en_construccion" ? "En construcción" : "Planificada"
+                print("      • \(nombre) — \(label)")
             }
         }
-    } else {
-        // Distinta línea — buscar estaciones cercanas
-        let cercanas = estOrigen["estaciones_cercanas"] as? [[String: Any]] ?? []
-        if !cercanas.isEmpty {
-            print("\n🔀 No hay transbordo directo entre líneas.")
-            for cercana in cercanas {
-                let nombre = cercana["estacion"] as? String ?? ""
-                let linea = cercana["linea"] as? String ?? ""
-                let distancia = cercana["distancia_metros"] as? Int ?? 0
-                let nota = cercana["nota"] as? String ?? ""
-                print("   Estación cercana: \(nombre) (\(linea)) — \(distancia)m")
-                print("   Nota: \(nota)")
+
+        if !intermedias.isEmpty {
+            print("\n   Paradas intermedias:")
+            for est in intermedias {
+                let nombre = est["nombre"] as? String ?? ""
+                let estado = est["estado"] as? String ?? ""
+                var icon = "✅"
+                if estado == "en_construccion" { icon = "⚠️ " }
+                if estado == "planificada"     { icon = "📋" }
+                print("   \(icon) → \(nombre)")
             }
+        }
+
+    // ── CASO 2: Líneas distintas — buscar transbordo ─────────
+    } else {
+        guard let lineaOrigen = obtenerLinea(deEstacion: idOrigen),
+              let estacionesOrigen = lineaOrigen["estaciones"] as? [[String: Any]],
+              let nombreLineaOrigen = lineaOrigen["nombre"] as? String,
+              let lineaDestino = obtenerLinea(deEstacion: idDestino),
+              let nombreLineaDestino = lineaDestino["nombre"] as? String else { return }
+
+        // Buscar punto de transbordo entre las dos líneas
+        var estTransbordo: [String: Any]?
+        var estConexion: [String: Any]?
+        var notaConexion = ""
+        var distanciaConexion = 0
+
+        for estacion in estacionesOrigen {
+            let cercanas = estacion["estaciones_cercanas"] as? [[String: Any]] ?? []
+            for cercana in cercanas {
+                let lineaCercana = cercana["linea"] as? String ?? ""
+                if lineaCercana == lineaIdDestino {
+                    estTransbordo = estacion
+                    let nombreCercana = cercana["estacion"] as? String ?? ""
+                    let resultadosCercana = buscarEstacion(nombreCercana)
+                    if !resultadosCercana.isEmpty {
+                        estConexion = resultadosCercana.first {
+                            let id = $0["id"] as? String ?? ""
+                            return id.hasPrefix(lineaIdDestino)
+                        }
+                    }
+                    notaConexion = cercana["nota"] as? String ?? ""
+                    distanciaConexion = cercana["distancia_metros"] as? Int ?? 0
+                    break
+                }
+            }
+            if estTransbordo != nil { break }
+        }
+
+        // ── CASO 2A: Transbordo encontrado ───────────────────
+        if let transbordo = estTransbordo, let conexion = estConexion {
+            let nombreTransbordo = transbordo["nombre"] as? String ?? ""
+            let nombreConexion   = conexion["nombre"]   as? String ?? ""
+            let estadoTransbordo = transbordo["estado"] as? String ?? ""
+            let estadoConexion   = conexion["estado"]   as? String ?? ""
+            let ordenOrigen      = estOrigen["orden"]   as? Int ?? 0
+            let ordenTransbordo  = transbordo["orden"]  as? Int ?? 0
+            let ordenConexion    = conexion["orden"]    as? Int ?? 0
+            let ordenDestino     = estDestino["orden"]  as? Int ?? 0
+
+            let estacionesTramo1 = abs(ordenTransbordo - ordenOrigen)
+            let estacionesTramo2 = abs(ordenDestino - ordenConexion)
+            let totalEstaciones  = estacionesTramo1 + estacionesTramo2
+            let tiempoEstimado   = totalEstaciones * 2
+
+            // Advertencia si el transbordo no está operativo
+            if estadoTransbordo != "operativa" || estadoConexion != "operativa" {
+                print("\n⚠️  Atención: Esta ruta incluye estaciones de transbordo que no están operativas.")
+                if estadoTransbordo != "operativa" {
+                    let label = estadoTransbordo == "en_construccion" ? "En construcción" : "Planificada"
+                    print("   • \(nombreTransbordo) (\(nombreLineaOrigen)) — \(label)")
+                }
+                if estadoConexion != "operativa" {
+                    let label = estadoConexion == "en_construccion" ? "En construcción" : "Planificada"
+                    print("   • \(nombreConexion) (\(nombreLineaDestino)) — \(label)")
+                }
+                print("   Se muestra la ruta como referencia futura.\n")
+            }
+
+            print("\n🗺  Ruta con transbordo:\n")
+            print("   Tramo 1: \(nombreLineaOrigen)")
+            print("   Desde \(nombreOrigen) → \(nombreTransbordo)")
+            print("   Estaciones: \(estacionesTramo1)  |  ~\(estacionesTramo1 * 2) min")
+
+            if distanciaConexion > 0 {
+                print("\n   🔀 Transbordo: \(notaConexion)")
+                print("      Distancia a pie: ~\(distanciaConexion)m")
+            } else {
+                print("\n   🔀 Transbordo: \(notaConexion)")
+            }
+
+            print("\n   Tramo 2: \(nombreLineaDestino)")
+            print("   Desde \(nombreConexion) → \(nombreDestino)")
+            print("   Estaciones: \(estacionesTramo2)  |  ~\(estacionesTramo2 * 2) min")
+
+            print("\n   ──────────────────────────────────────")
+            print("   Total estaciones: \(totalEstaciones)")
+            print("   Tiempo estimado:  ~\(tiempoEstimado) min (sin contar transbordo)")
+
+        // ── CASO 2B: Sin transbordo — delegar a IA ───────────
         } else {
-            print("\n🔀 Las estaciones están en líneas distintas.")
-            print("   Por ahora no hay conexión directa entre ellas.")
-            print("   Usa la opción 1 para preguntarle a la IA cómo llegar.")
+            print("\n🔀 No encontré conexión directa entre \(nombreLineaOrigen) y \(nombreLineaDestino).")
+            print("   Consultando a la IA para sugerirte la mejor ruta...\n")
+            let pregunta = "¿Cómo puedo ir de la estación \(nombreOrigen) a la estación \(nombreDestino)? Dame una ruta paso a paso usando el Metro de Lima."
+            preguntarIA(pregunta)
         }
     }
 }
@@ -1901,120 +2016,114 @@ func configurarSIGINT() {
     }
 }
 // ─── LLAMADA A GEMINI API ────────────────────────────────────
-func preguntarIA(_ pregunta: String) {
-    // Agregar pregunta al historial
+func preguntarIA(_ pregunta: String, intento: Int = 1) {
+    let maxIntentos = 3
+
     historial.append(["role": "user", "content": pregunta])
 
     guard let apiKey = ProcessInfo.processInfo.environment["GEMINI_API_KEY"],
           !apiKey.isEmpty else {
         print("❌ No se encontró la API Key. Configura GEMINI_API_KEY.")
+        historial.removeLast()
         return
     }
 
-    // Construir el system prompt con contexto del JSON
     let systemPrompt = """
-    Eres un asistente experto en el Metro de Lima y Callao.
-    Responde preguntas sobre líneas, estaciones, rutas y lugares cercanos.
-    Basa tus respuestas ÚNICAMENTE en estos datos reales del sistema:
+    Eres un asistente experto en el Metro de Lima y Callao con conocimiento general de Lima.
+
+    Tienes acceso a los datos oficiales del sistema del Metro de Lima:
 
     \(jsonString)
 
-    Reglas:
-    - Sé conciso y directo.
-    - Si una estación no está operativa, indícalo claramente.
-    - Si no tienes información suficiente, dilo honestamente.
+    Cómo debes comportarte:
+    - Tu prioridad es ayudar al usuario a usar el Metro de Lima.
+    - Usa los datos del JSON como fuente principal para información de estaciones, líneas, rutas, horarios y tarifas.
+    - Si el usuario pregunta por un lugar, instituto, centro comercial, hospital u otro punto de referencia, usa tu conocimiento general de Lima para identificar en qué distrito está y qué estación del JSON queda más cerca.
+    - Si una estación no está operativa, indícalo claramente con su estado.
+    - Si no puedes relacionar la pregunta con el Metro de Lima de ninguna forma, responde de forma breve y redirige al usuario hacia consultas sobre el Metro.
     - Responde siempre en español.
-    - No inventes estaciones ni datos que no estén en el JSON.
+    - Sé conciso y directo.
+
+    Formato de respuesta obligatorio:
+    - NUNCA uses markdown, asteriscos, guiones, bullets ni ningún símbolo de formato.
+    - Escribe en texto plano, como si fuera una conversación normal.
+    - Máximo 4 líneas por respuesta.
+    - Separa la información con punto y coma o punto seguido, nunca con listas.
     """
 
-    // Construir el historial en formato Gemini
     var contents: [[String: Any]] = []
+    contents.append(["role": "user", "parts": [["text": systemPrompt]]])
+    contents.append(["role": "model", "parts": [["text": "Entendido. Soy tu asistente experto en el Metro de Lima. ¿En qué puedo ayudarte?"]]])
 
-    // System prompt como primer mensaje del usuario
-    contents.append([
-        "role": "user",
-        "parts": [["text": systemPrompt]]
-    ])
-    contents.append([
-        "role": "model",
-        "parts": [["text": "Entendido. Soy tu asistente experto en el Metro de Lima. ¿En qué puedo ayudarte?"]]
-    ])
-
-    // Agregar historial de conversación
     for mensaje in historial {
         let role = mensaje["role"] == "user" ? "user" : "model"
         let content = mensaje["content"] ?? ""
-        contents.append([
-            "role": role,
-            "parts": [["text": content]]
-        ])
+        contents.append(["role": role, "parts": [["text": content]]])
     }
 
     let body: [String: Any] = [
         "contents": contents,
-        "generationConfig": [
-            "maxOutputTokens": 1024,
-            "temperature": 0.3
-        ]
+        "generationConfig": ["maxOutputTokens": 2048, "temperature": 0.3]
     ]
 
     let urlString = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=\(apiKey)"
 
-    guard let url = URL(string: urlString) else {
-        print("❌ URL inválida.")
-        return
-    }
-
-    guard let bodyData = try? JSONSerialization.data(withJSONObject: body) else {
+    guard let url = URL(string: urlString),
+          let bodyData = try? JSONSerialization.data(withJSONObject: body) else {
         print("❌ Error al construir el request.")
+        historial.removeLast()
         return
     }
 
-    // Configurar el request
     var request = URLRequest(url: url)
     request.httpMethod = "POST"
     request.setValue("application/json", forHTTPHeaderField: "Content-Type")
     request.httpBody = bodyData
+    request.timeoutInterval = 15
 
-    print("\n🤖 Consultando a la IA...\n")
+    if intento == 1 {
+        print("\n🤖 Consultando a la IA...\n")
+    } else {
+        print("   Reintentando (\(intento)/\(maxIntentos))...\n")
+    }
 
-    // Semáforo para esperar respuesta sincrónica
     let semaphore = DispatchSemaphore(value: 0)
     var respuestaFinal = ""
+    var debeReintentar = false
 
     let task = URLSession.shared.dataTask(with: request) { data, response, error in
         defer { semaphore.signal() }
 
         if let error = error {
-            print("❌ Error de conexión: \(error.localizedDescription)")
+            print("⚠️  Sin conexión: \(error.localizedDescription)")
             return
         }
 
-        guard let data = data else {
-            print("❌ No se recibió respuesta.")
+        guard let data = data,
+              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+            print("⚠️  Respuesta inválida de la IA.")
             return
         }
 
-        guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
-            print("❌ Respuesta inválida de la API.")
-            return
-        }
-
-        // Verificar error de la API
         if let error = json["error"] as? [String: Any],
            let mensaje = error["message"] as? String {
-            print("❌ Error de API: \(mensaje)")
+            // Error de alta demanda — reintentar
+            if mensaje.contains("high demand") || mensaje.contains("overloaded") ||
+               mensaje.contains("temporarily") || mensaje.contains("unavailable") {
+                debeReintentar = true
+            } else {
+                print("⚠️  La IA no está disponible ahora. Intenta de nuevo en unos segundos.")
+            }
             return
         }
 
-        // Extraer la respuesta de Gemini
         guard let candidates = json["candidates"] as? [[String: Any]],
               let primero = candidates.first,
               let content = primero["content"] as? [String: Any],
               let parts = content["parts"] as? [[String: Any]],
               let primerPart = parts.first,
               let texto = primerPart["text"] as? String else {
-            print("❌ No se pudo extraer la respuesta.")
+            print("⚠️  No se pudo extraer la respuesta.")
             return
         }
 
@@ -2023,6 +2132,20 @@ func preguntarIA(_ pregunta: String) {
 
     task.resume()
     semaphore.wait()
+
+    // Reintentar si hubo alta demanda
+    if debeReintentar {
+        if intento < maxIntentos {
+            historial.removeLast()
+            // Esperar 2 segundos antes de reintentar
+            Thread.sleep(forTimeInterval: 2.0)
+            preguntarIA(pregunta, intento: intento + 1)
+        } else {
+            print("⚠️  La IA está muy ocupada en este momento. Intenta de nuevo en unos segundos.")
+            historial.removeLast()
+        }
+        return
+    }
 
     if !respuestaFinal.isEmpty {
         historial.append(["role": "assistant", "content": respuestaFinal])
