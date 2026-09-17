@@ -111,4 +111,4 @@ MetroLima/
 
 ## 👤 Autor
 
-Gabriel Llanos — EL CLAN EAFC S.A. / TECSUP Lima
+Gabriel Llanos
