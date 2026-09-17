@@ -2192,7 +2192,7 @@ func opcionPreguntaLibre() {
     print("→ ", terminator: "")
     let pregunta = readLine() ?? ""
 
-    guard !pregunta.isEmpty else {
+    guard !pregunta.trimmingCharacters(in: .whitespaces).isEmpty else {
         print("⚠️  No ingresaste nada.")
         return
     }
@@ -2221,8 +2221,8 @@ func recargarSaldo() {
         print("⚠️  Ingresa un monto válido.")
         return
     }
-    guard monto > 0 else {
-        print("⚠️  El monto debe ser mayor a S/. 0.00")
+    guard monto > 1.0 else {
+        print("⚠️  El monto debe ser mayor a S/. 1.00")
         return
     }
     guard monto <= 100 else {
@@ -2345,7 +2345,7 @@ func insertarEstacion() {
     let inputLinea = readLine() ?? ""
     guard let opcionLinea = Int(inputLinea), opcionLinea >= 1, opcionLinea <= lineas.count else {
         if inputLinea == "0" { return }
-        print("⚠️  Opción inválida.")
+        print("⚠️  Opción inválida. Elige un número entre 1 y \(lineas.count).")
         return
     }
 
@@ -2368,6 +2368,13 @@ func insertarEstacion() {
     print("\nOpción: ", terminator: "")
 
     let inputPos = readLine() ?? ""
+
+    // Validar que solo sea 1 o 2
+    guard inputPos == "1" || inputPos == "2" else {
+        print("⚠️  Opción inválida. Escribe 1 o 2.")
+        return
+    }
+
     var ordenInsercion = estaciones.count + 1
 
     if inputPos == "2" {
@@ -2377,18 +2384,22 @@ func insertarEstacion() {
         print("\nOpción: ", terminator: "")
         let inputAntesDespues = readLine() ?? ""
 
+        // Validar que solo sea 1 o 2
+        guard inputAntesDespues == "1" || inputAntesDespues == "2" else {
+            print("⚠️  Opción inválida. Escribe 1 o 2.")
+            return
+        }
+
         print("\nNúmero de estación de referencia (1-\(estaciones.count)): ", terminator: "")
         let inputOrden = readLine() ?? ""
         guard let ordenRef = Int(inputOrden), ordenRef >= 1, ordenRef <= estaciones.count else {
-            print("⚠️  Número inválido.")
+            print("⚠️  Número inválido. Debe estar entre 1 y \(estaciones.count).")
             return
         }
 
         if inputAntesDespues == "1" {
-            // Antes — la nueva toma el orden de la referencia
             ordenInsercion = ordenRef
         } else {
-            // Después — la nueva toma el orden siguiente
             ordenInsercion = ordenRef + 1
         }
 
@@ -2400,30 +2411,68 @@ func insertarEstacion() {
         }
     }
 
-    // Datos de la nueva estación
+    // ── Nombre ───────────────────────────────────────────────
     print("\nNombre de la nueva estación: ", terminator: "")
-    let nombre = readLine() ?? ""
+    let nombreInput = readLine() ?? ""
+    let nombre = nombreInput.trimmingCharacters(in: .whitespaces)
     guard !nombre.isEmpty else {
         print("⚠️  El nombre no puede estar vacío.")
         return
     }
 
+    // Validar nombre duplicado en la misma línea
+    let nombreNorm = normalizar(nombre)
+    let duplicado = estaciones.contains {
+        normalizar($0["nombre"] as? String ?? "") == nombreNorm
+    }
+    guard !duplicado else {
+        print("⚠️  Ya existe una estación con ese nombre en esta línea.")
+        return
+    }
+
+    // ── Distrito ─────────────────────────────────────────────
     print("Distrito: ", terminator: "")
-    let distrito = readLine() ?? ""
+    let distritoInput = readLine() ?? ""
+    let distrito = distritoInput.trimmingCharacters(in: .whitespaces)
+    guard !distrito.isEmpty else {
+        print("⚠️  El distrito no puede estar vacío.")
+        return
+    }
 
-    print("Estado (operativa / en_construccion / planificada): ", terminator: "")
-    let estadoInput = readLine() ?? ""
+    // ── Estado ───────────────────────────────────────────────
     let estadosValidos = ["operativa", "en_construccion", "planificada"]
-    let estado = estadosValidos.contains(estadoInput) ? estadoInput : "planificada"
+    var estado = ""
+    var intentosEstado = 0
+    let maxIntentosEstado = 3
 
-    print("Referencias (separadas por coma): ", terminator: "")
+    while !estadosValidos.contains(estado) {
+        if intentosEstado >= maxIntentosEstado {
+            print("⚠️  Demasiados intentos. Se asignará 'planificada' por defecto.")
+            estado = "planificada"
+            break
+        }
+        if intentosEstado > 0 {
+            print("⚠️  Estado inválido. Opciones válidas: operativa, en_construccion, planificada")
+        }
+        print("Estado (operativa / en_construccion / planificada): ", terminator: "")
+        estado = readLine()?.trimmingCharacters(in: .whitespaces) ?? ""
+        intentosEstado += 1
+    }
+
+    // ── Referencias ──────────────────────────────────────────
+    print("Referencias (separadas por coma, Enter para omitir): ", terminator: "")
     let refsInput = readLine() ?? ""
-    let referencias = refsInput.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }
+    let referencias = refsInput.trimmingCharacters(in: .whitespaces).isEmpty
+        ? [String]()
+        : refsInput.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty }
 
-    // Generar ID
+    if referencias.isEmpty {
+        print("   ℹ️  Sin referencias. Se guardará sin lugares de referencia.")
+    }
+
+    // ── Crear y guardar ──────────────────────────────────────
     let nuevoId = "\(lineaId)-E\(String(format: "%02d", ordenInsercion))N"
 
-    // Crear nueva estación
     let nuevaEstacion: [String: Any] = [
         "id": nuevoId,
         "nombre": nombre,
@@ -2434,7 +2483,6 @@ func insertarEstacion() {
         "estaciones_cercanas": []
     ]
 
-    // Insertar en la posición correcta
     estaciones.append(nuevaEstacion)
     estaciones.sort { ($0["orden"] as? Int ?? 0) < ($1["orden"] as? Int ?? 0) }
     lineas[lineaIndex]["estaciones"] = estaciones
@@ -2446,44 +2494,119 @@ func insertarEstacion() {
 func crearNuevaLinea() {
     print("\n── CREAR NUEVA LÍNEA ──────────────────────")
 
-    print("ID de la línea (ej: L5): ", terminator: "")
-    let id = readLine() ?? ""
+    // ── ID ───────────────────────────────────────────────────
+    print("ID de la línea (ej: L5, sin espacios): ", terminator: "")
+    let idInput = readLine() ?? ""
+    let id = idInput.trimmingCharacters(in: .whitespaces)
     guard !id.isEmpty else {
         print("⚠️  El ID no puede estar vacío.")
         return
     }
-
-    // Verificar que no exista ya
-    if lineas.contains(where: { $0["id"] as? String == id }) {
-        print("⚠️  Ya existe una línea con ese ID.")
+    guard !id.contains(" ") else {
+        print("⚠️  El ID no puede contener espacios.")
+        return
+    }
+    guard !lineas.contains(where: { $0["id"] as? String == id }) else {
+        print("⚠️  Ya existe una línea con el ID '\(id)'.")
         return
     }
 
+    // ── Nombre ───────────────────────────────────────────────
     print("Nombre (ej: Línea 5): ", terminator: "")
-    let nombre = readLine() ?? ""
+    let nombreInput = readLine() ?? ""
+    let nombre = nombreInput.trimmingCharacters(in: .whitespaces)
+    guard !nombre.isEmpty else {
+        print("⚠️  El nombre no puede estar vacío.")
+        return
+    }
 
+    // ── Color ────────────────────────────────────────────────
     print("Color (ej: Morado): ", terminator: "")
-    let color = readLine() ?? ""
+    let colorInput = readLine() ?? ""
+    let color = colorInput.trimmingCharacters(in: .whitespaces)
+    guard !color.isEmpty else {
+        print("⚠️  El color no puede estar vacío.")
+        return
+    }
 
-    print("Tipo (ej: Subterráneo / Elevado / BRT): ", terminator: "")
-    let tipo = readLine() ?? ""
+    // ── Tipo ─────────────────────────────────────────────────
+    let tiposValidos = ["Subterráneo", "Elevado", "Superficie", "BRT", "Elevado/Superficie"]
+    var tipo = ""
+    var intentosTipo = 0
+    let maxIntentosTipo = 3
 
+    while !tiposValidos.contains(tipo) {
+        if intentosTipo >= maxIntentosTipo {
+            print("⚠️  Demasiados intentos. Se asignará 'Subterráneo' por defecto.")
+            tipo = "Subterráneo"
+            break
+        }
+        if intentosTipo > 0 {
+            print("⚠️  Tipo inválido. Opciones: Subterráneo, Elevado, Superficie, BRT, Elevado/Superficie")
+        }
+        print("Tipo (Subterráneo / Elevado / Superficie / BRT / Elevado/Superficie): ", terminator: "")
+        tipo = readLine()?.trimmingCharacters(in: .whitespaces) ?? ""
+        intentosTipo += 1
+    }
+
+    // ── Inicio y Fin ─────────────────────────────────────────
     print("Estación de inicio: ", terminator: "")
-    let inicio = readLine() ?? ""
+    let inicioInput = readLine() ?? ""
+    let inicio = inicioInput.trimmingCharacters(in: .whitespaces)
+    guard !inicio.isEmpty else {
+        print("⚠️  La estación de inicio no puede estar vacía.")
+        return
+    }
 
     print("Estación final: ", terminator: "")
-    let fin = readLine() ?? ""
+    let finInput = readLine() ?? ""
+    let fin = finInput.trimmingCharacters(in: .whitespaces)
+    guard !fin.isEmpty else {
+        print("⚠️  La estación final no puede estar vacía.")
+        return
+    }
 
+    // ── Horarios ─────────────────────────────────────────────
     print("Horario semana (ej: 05:00 - 22:00): ", terminator: "")
-    let horarioSemana = readLine() ?? ""
+    let horarioSemanaInput = readLine() ?? ""
+    let horarioSemana = horarioSemanaInput.trimmingCharacters(in: .whitespaces)
+    guard !horarioSemana.isEmpty else {
+        print("⚠️  El horario de semana no puede estar vacío.")
+        return
+    }
 
     print("Horario domingo (ej: 05:30 - 22:00): ", terminator: "")
-    let horarioDomingo = readLine() ?? ""
+    let horarioDomingoInput = readLine() ?? ""
+    let horarioDomingo = horarioDomingoInput.trimmingCharacters(in: .whitespaces)
+    guard !horarioDomingo.isEmpty else {
+        print("⚠️  El horario de domingo no puede estar vacío.")
+        return
+    }
 
-    print("Tarifa en soles (ej: 1.50): ", terminator: "")
-    let tarifaInput = readLine() ?? ""
-    let tarifa = Double(tarifaInput) ?? 0.0
+    // ── Tarifa ───────────────────────────────────────────────
+    var tarifa: Double = 0.0
+    var intentosTarifa = 0
+    let maxIntentosTarifa = 3
 
+    while true {
+        if intentosTarifa >= maxIntentosTarifa {
+            print("⚠️  Demasiados intentos. Se asignará tarifa 0.0 por defecto.")
+            tarifa = 0.0
+            break
+        }
+        if intentosTarifa > 0 {
+            print("⚠️  Ingresa un número válido mayor o igual a 0. Ej: 1.50")
+        }
+        print("Tarifa en soles (ej: 1.50): ", terminator: "")
+        let tarifaInput = readLine()?.trimmingCharacters(in: .whitespaces) ?? ""
+        if let valor = Double(tarifaInput), valor >= 0 {
+            tarifa = valor
+            break
+        }
+        intentosTarifa += 1
+    }
+
+    // ── Crear y guardar ──────────────────────────────────────
     let nuevaLinea: [String: Any] = [
         "id": id,
         "nombre": nombre,
@@ -2500,6 +2623,7 @@ func crearNuevaLinea() {
 
     lineas.append(nuevaLinea)
     print("\n✅ Línea '\(nombre)' creada correctamente.")
+    print("   ID: \(id) | Color: \(color) | Tipo: \(tipo) | Tarifa: S/. \(String(format: "%.2f", tarifa))")
     print("   Ahora puedes insertar estaciones en ella desde la opción 1.")
 }
 
@@ -2580,7 +2704,7 @@ func iniciar() {
             continuar = false
             print("\n👋 ¡Hasta luego! Gracias por usar Metro de Lima.")
         default:
-            print("⚠️  Opción no válida. Elige entre 0 y 5.")
+            print("⚠️  Opción no válida. Elige entre 0 y 7.")
         }
     }
 }
