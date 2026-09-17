@@ -1983,6 +1983,7 @@ func opcionInfoLinea() {
 }
 
 // ─── OPCIÓN CÓMO LLEGAR ──────────────────────────────────────
+// ─── OPCIÓN CÓMO LLEGAR ──────────────────────────────────────
 func opcionComoLlegar() {
     print("\nEstación de origen: ", terminator: "")
     let origen = readLine() ?? ""
@@ -1996,11 +1997,44 @@ func opcionComoLlegar() {
         print("⚠️  No ingresaste el destino.")
         return
     }
+
+    // Verificar que ambas estaciones existen antes de continuar
+    let resultadosOrigen = buscarEstacion(origen)
+    let resultadosDestino = buscarEstacion(destino)
+
+    guard !resultadosOrigen.isEmpty else {
+        print("⚠️  No encontré la estación de origen: \(origen)")
+        return
+    }
+    guard !resultadosDestino.isEmpty else {
+        print("⚠️  No encontré la estación de destino: \(destino)")
+        return
+    }
+
     buscarRuta(origen: origen, destino: destino)
+
+    // Solo ofrecer cobro si la estación de origen es operativa
+    let estOrigen = resultadosOrigen[0]
+    let idOrigen = estOrigen["id"] as? String ?? ""
+    let lineaId = idOrigen.components(separatedBy: "-")[0]
+    let estadoOrigen = estOrigen["estado"] as? String ?? ""
+
+    if estadoOrigen == "operativa" {
+        print("\n¿Deseas registrar este viaje en tu tarjeta? (s/n): ", terminator: "")
+        let respuesta = readLine() ?? ""
+        if respuesta.lowercased() == "s" {
+            _ = cobrarViaje(linea: lineaId, origen: origen, destino: destino)
+        }
+    }
 }
+
 
 // ─── HISTORIAL DE CONVERSACIÓN ───────────────────────────────
 var historial: [[String: String]] = []
+
+// ─── TARJETA DE TRANSPORTE ───────────────────────────────────
+var saldoTarjeta: Double = 0.0
+var historialTarjeta: [(tipo: String, monto: Double, descripcion: String)] = []
 
 // ─── MANEJO DE SIGINT (Ctrl+C) ───────────────────────────────
 func configurarSIGINT() {
@@ -2169,6 +2203,109 @@ func opcionPreguntaLibre() {
     preguntarIA(pregunta)
 }
 
+// ─── MOSTRAR SALDO ───────────────────────────────────────────
+func mostrarSaldo() {
+    print("\n╔══════════════════════════════════════════╗")
+    print("║         💳 TARJETA LIMA PASS             ║")
+    print("╠══════════════════════════════════════════╣")
+    print("║  Saldo actual: S/. \(String(format: "%.2f", saldoTarjeta))")
+    print("╚══════════════════════════════════════════╝")
+}
+
+// ─── RECARGAR SALDO ──────────────────────────────────────────
+func recargarSaldo() {
+    print("\nIngresa el monto a recargar (S/.): ", terminator: "")
+    let input = readLine() ?? ""
+
+    guard let monto = Double(input) else {
+        print("⚠️  Ingresa un monto válido.")
+        return
+    }
+    guard monto > 0 else {
+        print("⚠️  El monto debe ser mayor a S/. 0.00")
+        return
+    }
+    guard monto <= 100 else {
+        print("⚠️  El monto máximo de recarga es S/. 100.00")
+        return
+    }
+
+    saldoTarjeta += monto
+    historialTarjeta.append((
+        tipo: "recarga",
+        monto: monto,
+        descripcion: "Recarga de saldo"
+    ))
+    print("\n✅ Recarga exitosa. Saldo actual: S/. \(String(format: "%.2f", saldoTarjeta))")
+}
+
+// ─── COBRAR VIAJE ────────────────────────────────────────────
+func cobrarViaje(linea: String, origen: String, destino: String) -> Bool {
+    // Buscar tarifa de la línea
+    let lineaData = lineas.first { $0["id"] as? String == linea }
+    let tarifa = lineaData?["tarifa"] as? Double ?? 1.50
+
+    guard saldoTarjeta >= tarifa else {
+        print("\n❌ Saldo insuficiente para este viaje.")
+        print("   Tarifa requerida: S/. \(String(format: "%.2f", tarifa))")
+        print("   Saldo actual:     S/. \(String(format: "%.2f", saldoTarjeta))")
+        print("   Recarga tu tarjeta en la opción 6 del menú.")
+        return false
+    }
+
+    saldoTarjeta -= tarifa
+    historialTarjeta.append((
+        tipo: "viaje",
+        monto: tarifa,
+        descripcion: "Viaje \(linea) (\(origen) → \(destino))"
+    ))
+    print("\n✅ Viaje registrado. Se descontó S/. \(String(format: "%.2f", tarifa))")
+    print("   Saldo restante: S/. \(String(format: "%.2f", saldoTarjeta))")
+    return true
+}
+
+// ─── HISTORIAL TARJETA ───────────────────────────────────────
+func mostrarHistorialTarjeta() {
+    if historialTarjeta.isEmpty {
+        print("\n📋 No hay movimientos registrados en esta sesión.")
+        return
+    }
+    print("\n📋 Historial de movimientos:")
+    print("──────────────────────────────────────────")
+    for mov in historialTarjeta {
+        let signo = mov.tipo == "recarga" ? "+" : "-"
+        let monto = String(format: "%.2f", mov.monto)
+        print("   \(signo) S/. \(monto)  —  \(mov.descripcion)")
+    }
+    print("──────────────────────────────────────────")
+    print("   Saldo actual: S/. \(String(format: "%.2f", saldoTarjeta))")
+}
+
+// ─── SUBMENÚ TARJETA ─────────────────────────────────────────
+func submenuTarjeta() {
+    var continuar = true
+    while continuar {
+        print("\n══════════════════════════════════════════")
+        print("       💳 GESTIÓN DE TARJETA              ")
+        print("══════════════════════════════════════════")
+        print("  1. Ver saldo")
+        print("  2. Recargar saldo")
+        print("  3. Historial de movimientos")
+        print("  0. Volver")
+        print("══════════════════════════════════════════")
+        print("Opción: ", terminator: "")
+
+        let input = readLine() ?? ""
+        switch input {
+        case "1": mostrarSaldo()
+        case "2": recargarSaldo()
+        case "3": mostrarHistorialTarjeta()
+        case "0": continuar = false
+        default:  print("⚠️  Opción no válida.")
+        }
+    }
+}
+
 // ─── MENÚ PRINCIPAL ──────────────────────────────────────────
 func mostrarMenu() {
     print("\n══════════════════════════════════════════")
@@ -2179,6 +2316,7 @@ func mostrarMenu() {
     print("  3. Buscar estación o lugar")
     print("  4. Información de una línea")
     print("  5. ¿Cómo llegar a...?")
+    print("  6. Gestionar tarjeta de transporte")
     print("  0. Salir")
     print("══════════════════════════════════════════")
     print("Opción: ", terminator: "")
@@ -2206,6 +2344,8 @@ func iniciar() {
             opcionInfoLinea()
         case "5":
             opcionComoLlegar()
+        case "6":
+            submenuTarjeta()
         case "0":
             continuar = false
             print("\n👋 ¡Hasta luego! Gracias por usar Metro de Lima.")
