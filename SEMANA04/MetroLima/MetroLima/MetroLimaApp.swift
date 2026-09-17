@@ -109,7 +109,14 @@ let jsonString = """
           "distrito": "Santiago de Surco",
           "estado": "operativa",
           "referencias": ["Cuartel Cabitos", "Av. Santiago de Surco"],
-          "estaciones_cercanas": []
+          "estaciones_cercanas": [
+            {
+              "estacion": "Cabitos",
+              "linea": "L3",
+              "distancia_metros": 0,
+              "nota": "Transbordo con Línea 3 (planificado)"
+            }
+          ]
         },
         {
           "id": "L1-E11",
@@ -416,7 +423,20 @@ let jsonString = """
           "distrito": "Lima",
           "estado": "en_construccion",
           "referencias": ["Paseo Colón", "Centro de Lima", "Metropolitano"],
-          "estaciones_cercanas": []
+          "estaciones_cercanas": [
+            {
+              "estacion": "Estación Central",
+              "linea": "L3",
+              "distancia_metros": 0,
+              "nota": "Transbordo con Línea 3 (planificado)"
+            },
+            {
+              "estacion": "Estación Central",
+              "linea": "MET",
+              "distancia_metros": 200,
+              "nota": "Conexión con Metropolitano"
+            }
+          ]
         },
         {
           "id": "L2-E16",
@@ -488,7 +508,14 @@ let jsonString = """
           "distrito": "Carmen de la Legua",
           "estado": "en_construccion",
           "referencias": ["Av. Oscar R. Benavides", "Carmen de la Legua"],
-          "estaciones_cercanas": []
+          "estaciones_cercanas": [
+            {
+              "estacion": "Carmen de la Legua",
+              "linea": "L4",
+              "distancia_metros": 0,
+              "nota": "Transbordo con Línea 4 (en construcción)"
+            }
+          ]
         },
         {
           "id": "L2-E24",
@@ -524,6 +551,1016 @@ let jsonString = """
           "distrito": "Callao",
           "estado": "en_construccion",
           "referencias": ["Puerto del Callao", "Terminal Marítimo", "Av. Guardia Chalaca"],
+          "estaciones_cercanas": []
+        }
+      ]
+    },
+    {
+      "id": "L3",
+      "nombre": "Línea 3",
+      "color": "Celeste",
+      "tipo": "Subterráneo",
+      "operativa": false,
+      "inicio": "El Álamo",
+      "fin": "Pedro Miotta",
+      "horario_semana": "Por definir",
+      "horario_domingo": "Por definir",
+      "tarifa": 0.0,
+      "estaciones": [
+        {
+          "id": "L3-E01",
+          "nombre": "El Álamo",
+          "orden": 1,
+          "distrito": "Comas",
+          "estado": "planificada",
+          "referencias": ["Av. El Álamo", "Comas"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "L3-E02",
+          "nombre": "Huandoy",
+          "orden": 2,
+          "distrito": "Los Olivos",
+          "estado": "planificada",
+          "referencias": ["Av. Huandoy", "Los Olivos"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "L3-E03",
+          "nombre": "2 de Octubre",
+          "orden": 3,
+          "distrito": "Los Olivos",
+          "estado": "planificada",
+          "referencias": ["Av. 2 de Octubre", "Los Olivos"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "L3-E04",
+          "nombre": "Villa Sol",
+          "orden": 4,
+          "distrito": "Los Olivos",
+          "estado": "planificada",
+          "referencias": ["Urb. Villa Sol", "Los Olivos"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "L3-E05",
+          "nombre": "Naranjal",
+          "orden": 5,
+          "distrito": "Independencia",
+          "estado": "planificada",
+          "referencias": ["Terminal Naranjal", "Metropolitano", "Independencia"],
+          "estaciones_cercanas": [
+            {
+              "estacion": "Naranjal",
+              "linea": "MET",
+              "distancia_metros": 100,
+              "nota": "Conexión con Terminal Naranjal del Metropolitano"
+            }
+          ]
+        },
+        {
+          "id": "L3-E06",
+          "nombre": "Carlos Izaguirre",
+          "orden": 6,
+          "distrito": "Independencia",
+          "estado": "planificada",
+          "referencias": ["Av. Carlos Izaguirre", "Independencia"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "L3-E07",
+          "nombre": "Tomás Valle",
+          "orden": 7,
+          "distrito": "San Martín de Porres",
+          "estado": "planificada",
+          "referencias": ["Av. Tomás Valle", "SMP"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "L3-E08",
+          "nombre": "Bartolomé de las Casas",
+          "orden": 8,
+          "distrito": "San Martín de Porres",
+          "estado": "planificada",
+          "referencias": ["Av. Bartolomé de las Casas", "SMP"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "L3-E09",
+          "nombre": "José Granda",
+          "orden": 9,
+          "distrito": "San Martín de Porres",
+          "estado": "planificada",
+          "referencias": ["Av. José Granda", "SMP"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "L3-E10",
+          "nombre": "Caquetá",
+          "orden": 10,
+          "distrito": "Rímac",
+          "estado": "planificada",
+          "referencias": ["Av. Caquetá", "Rímac", "Mercado de Caquetá"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "L3-E11",
+          "nombre": "Tacna",
+          "orden": 11,
+          "distrito": "Lima",
+          "estado": "planificada",
+          "referencias": ["Av. Tacna", "Centro de Lima"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "L3-E12",
+          "nombre": "Garcilaso de la Vega",
+          "orden": 12,
+          "distrito": "Lima",
+          "estado": "planificada",
+          "referencias": ["Av. Garcilaso de la Vega", "Centro de Lima"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "L3-E13",
+          "nombre": "Estación Central",
+          "orden": 13,
+          "distrito": "Lima",
+          "estado": "planificada",
+          "referencias": ["Paseo Colón", "Centro de Lima", "Metropolitano"],
+          "estaciones_cercanas": [
+            {
+              "estacion": "Estación Central",
+              "linea": "L2",
+              "distancia_metros": 0,
+              "nota": "Transbordo con Línea 2 (planificado)"
+            },
+            {
+              "estacion": "Estación Central",
+              "linea": "MET",
+              "distancia_metros": 200,
+              "nota": "Conexión con Metropolitano"
+            }
+          ]
+        },
+        {
+          "id": "L3-E14",
+          "nombre": "Parque de la Reserva",
+          "orden": 14,
+          "distrito": "Lima",
+          "estado": "planificada",
+          "referencias": ["Parque de la Reserva", "Circuito Mágico del Agua"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "L3-E15",
+          "nombre": "Museo de Historia Natural",
+          "orden": 15,
+          "distrito": "Jesús María",
+          "estado": "planificada",
+          "referencias": ["Museo de Historia Natural UNMSM", "Av. Arenales"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "L3-E16",
+          "nombre": "César Canevaro",
+          "orden": 16,
+          "distrito": "Lince",
+          "estado": "planificada",
+          "referencias": ["Av. César Canevaro", "Lince"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "L3-E17",
+          "nombre": "Conde de San Isidro",
+          "orden": 17,
+          "distrito": "San Isidro",
+          "estado": "planificada",
+          "referencias": ["Av. Arequipa", "Av. Javier Prado", "San Isidro"],
+          "estaciones_cercanas": [
+            {
+              "estacion": "Conde de San Isidro",
+              "linea": "L4",
+              "distancia_metros": 0,
+              "nota": "Transbordo con Línea 4 (planificado)"
+            }
+          ]
+        },
+        {
+          "id": "L3-E18",
+          "nombre": "Andrés Aramburú",
+          "orden": 18,
+          "distrito": "San Isidro",
+          "estado": "planificada",
+          "referencias": ["Av. Andrés Aramburú", "San Isidro"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "L3-E19",
+          "nombre": "Huaca Pucllana",
+          "orden": 19,
+          "distrito": "Miraflores",
+          "estado": "planificada",
+          "referencias": ["Huaca Pucllana", "Miraflores"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "L3-E20",
+          "nombre": "Parque Central de Miraflores",
+          "orden": 20,
+          "distrito": "Miraflores",
+          "estado": "planificada",
+          "referencias": ["Parque Kennedy", "Miraflores", "Av. Larco"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "L3-E21",
+          "nombre": "Parque Reducto",
+          "orden": 21,
+          "distrito": "Miraflores",
+          "estado": "planificada",
+          "referencias": ["Parque Reducto", "Av. Benavides", "Miraflores"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "L3-E22",
+          "nombre": "República de Panamá",
+          "orden": 22,
+          "distrito": "Miraflores",
+          "estado": "planificada",
+          "referencias": ["Av. República de Panamá", "Surquillo"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "L3-E23",
+          "nombre": "Juana Alarco",
+          "orden": 23,
+          "distrito": "Santiago de Surco",
+          "estado": "planificada",
+          "referencias": ["Av. Juana Alarco", "Surco"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "L3-E24",
+          "nombre": "Cabitos",
+          "orden": 24,
+          "distrito": "Santiago de Surco",
+          "estado": "planificada",
+          "referencias": ["Cuartel Cabitos", "Av. Santiago de Surco"],
+          "estaciones_cercanas": [
+            {
+              "estacion": "Cabitos",
+              "linea": "L1",
+              "distancia_metros": 0,
+              "nota": "Transbordo con Línea 1 (planificado)"
+            }
+          ]
+        },
+        {
+          "id": "L3-E25",
+          "nombre": "Alejandro Velasco",
+          "orden": 25,
+          "distrito": "Santiago de Surco",
+          "estado": "planificada",
+          "referencias": ["Av. Alejandro Velasco Astete", "Surco"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "L3-E26",
+          "nombre": "Las Gardenias",
+          "orden": 26,
+          "distrito": "Santiago de Surco",
+          "estado": "planificada",
+          "referencias": ["Av. Las Gardenias", "Surco"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "L3-E27",
+          "nombre": "Los Héroes",
+          "orden": 27,
+          "distrito": "San Juan de Miraflores",
+          "estado": "planificada",
+          "referencias": ["Av. Los Héroes", "SJM"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "L3-E28",
+          "nombre": "Pedro Miotta",
+          "orden": 28,
+          "distrito": "San Juan de Miraflores",
+          "estado": "planificada",
+          "referencias": ["Av. Pedro Miotta", "SJM"],
+          "estaciones_cercanas": []
+        }
+      ]
+    },
+    {
+      "id": "L4",
+      "nombre": "Línea 4",
+      "color": "Rojo",
+      "tipo": "Subterráneo",
+      "operativa": false,
+      "inicio": "Gambetta",
+      "fin": "Mercado Santa Anita",
+      "horario_semana": "Por definir",
+      "horario_domingo": "Por definir",
+      "tarifa": 0.0,
+      "estaciones": [
+        {
+          "id": "L4-E01",
+          "nombre": "Gambetta",
+          "orden": 1,
+          "distrito": "Callao",
+          "estado": "en_construccion",
+          "referencias": ["Av. Néstor Gambetta", "Av. Faucett", "Callao"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "L4-E02",
+          "nombre": "Canta Callao",
+          "orden": 2,
+          "distrito": "Callao",
+          "estado": "en_construccion",
+          "referencias": ["Av. Canta Callao", "Av. Faucett"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "L4-E03",
+          "nombre": "Bocanegra",
+          "orden": 3,
+          "distrito": "Callao",
+          "estado": "en_construccion",
+          "referencias": ["Av. Bocanegra", "Av. Faucett"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "L4-E04",
+          "nombre": "Aeropuerto",
+          "orden": 4,
+          "distrito": "Callao",
+          "estado": "en_construccion",
+          "referencias": ["Aeropuerto Internacional Jorge Chávez", "Av. Faucett"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "L4-E05",
+          "nombre": "El Olivar",
+          "orden": 5,
+          "distrito": "Callao",
+          "estado": "en_construccion",
+          "referencias": ["Av. El Olivar", "Av. Faucett"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "L4-E06",
+          "nombre": "Quilca",
+          "orden": 6,
+          "distrito": "Callao",
+          "estado": "en_construccion",
+          "referencias": ["Av. Quilca", "Av. Faucett"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "L4-E07",
+          "nombre": "Morales Duárez",
+          "orden": 7,
+          "distrito": "Callao",
+          "estado": "en_construccion",
+          "referencias": ["Av. Morales Duárez", "Av. Faucett"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "L4-E08",
+          "nombre": "Carmen de la Legua",
+          "orden": 8,
+          "distrito": "Carmen de la Legua",
+          "estado": "en_construccion",
+          "referencias": ["Av. Oscar R. Benavides", "Av. Faucett"],
+          "estaciones_cercanas": [
+            {
+              "estacion": "Carmen de la Legua",
+              "linea": "L2",
+              "distancia_metros": 0,
+              "nota": "Transbordo con Línea 2 (en construcción)"
+            }
+          ]
+        },
+        {
+          "id": "L4-E09",
+          "nombre": "Venezuela",
+          "orden": 9,
+          "distrito": "Lima",
+          "estado": "planificada",
+          "referencias": ["Av. Venezuela", "Cercado de Lima"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "L4-E10",
+          "nombre": "Rafael Escardó",
+          "orden": 10,
+          "distrito": "San Miguel",
+          "estado": "planificada",
+          "referencias": ["Av. Rafael Escardó", "San Miguel"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "L4-E11",
+          "nombre": "Pando",
+          "orden": 11,
+          "distrito": "San Miguel",
+          "estado": "planificada",
+          "referencias": ["Av. Pando", "San Miguel", "PUCP"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "L4-E12",
+          "nombre": "José de Sucre",
+          "orden": 12,
+          "distrito": "Pueblo Libre",
+          "estado": "planificada",
+          "referencias": ["Av. José de Sucre", "Pueblo Libre"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "L4-E13",
+          "nombre": "Brasil",
+          "orden": 13,
+          "distrito": "Pueblo Libre",
+          "estado": "planificada",
+          "referencias": ["Av. Brasil", "Pueblo Libre", "Jesús María"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "L4-E14",
+          "nombre": "Felipe Salaverry",
+          "orden": 14,
+          "distrito": "Jesús María",
+          "estado": "planificada",
+          "referencias": ["Av. Felipe Salaverry", "Jesús María"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "L4-E15",
+          "nombre": "Guillermo Prescott",
+          "orden": 15,
+          "distrito": "San Isidro",
+          "estado": "planificada",
+          "referencias": ["Av. Guillermo Prescott", "San Isidro"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "L4-E16",
+          "nombre": "Las Palmeras",
+          "orden": 16,
+          "distrito": "San Isidro",
+          "estado": "planificada",
+          "referencias": ["Av. Las Palmeras", "San Isidro"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "L4-E17",
+          "nombre": "Conde de San Isidro",
+          "orden": 17,
+          "distrito": "San Isidro",
+          "estado": "planificada",
+          "referencias": ["Av. Arequipa", "Av. Javier Prado", "San Isidro"],
+          "estaciones_cercanas": [
+            {
+              "estacion": "Conde de San Isidro",
+              "linea": "L3",
+              "distancia_metros": 0,
+              "nota": "Transbordo con Línea 3 (planificado)"
+            }
+          ]
+        },
+        {
+          "id": "L4-E18",
+          "nombre": "Rivera Navarrete",
+          "orden": 18,
+          "distrito": "San Isidro",
+          "estado": "planificada",
+          "referencias": ["Av. Rivera Navarrete", "San Isidro", "Centro Empresarial"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "L4-E19",
+          "nombre": "Pablo Carriquirry",
+          "orden": 19,
+          "distrito": "San Isidro",
+          "estado": "planificada",
+          "referencias": ["Av. Pablo Carriquirry", "San Isidro"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "L4-E20",
+          "nombre": "La Cultura",
+          "orden": 20,
+          "distrito": "San Borja",
+          "estado": "planificada",
+          "referencias": ["Museo de la Nación", "Av. Javier Prado Este", "San Borja"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "L4-E21",
+          "nombre": "San Luis",
+          "orden": 21,
+          "distrito": "San Luis",
+          "estado": "planificada",
+          "referencias": ["Av. San Luis", "San Luis"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "L4-E22",
+          "nombre": "Monterrico",
+          "orden": 22,
+          "distrito": "Santiago de Surco",
+          "estado": "planificada",
+          "referencias": ["Monterrico", "Jockey Plaza", "Surco"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "L4-E23",
+          "nombre": "Manuel Olguín",
+          "orden": 23,
+          "distrito": "Santiago de Surco",
+          "estado": "planificada",
+          "referencias": ["Av. Manuel Olguín", "Surco"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "L4-E24",
+          "nombre": "Los Frutales",
+          "orden": 24,
+          "distrito": "Ate",
+          "estado": "planificada",
+          "referencias": ["Av. Los Frutales", "Ate"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "L4-E25",
+          "nombre": "La Molina",
+          "orden": 25,
+          "distrito": "La Molina",
+          "estado": "planificada",
+          "referencias": ["Av. La Molina", "La Molina", "Universidad La Molina"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "L4-E26",
+          "nombre": "Santa Patricia",
+          "orden": 26,
+          "distrito": "La Molina",
+          "estado": "planificada",
+          "referencias": ["Urb. Santa Patricia", "La Molina"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "L4-E27",
+          "nombre": "Mayorazgo",
+          "orden": 27,
+          "distrito": "Ate",
+          "estado": "planificada",
+          "referencias": ["Av. Mayorazgo", "Ate"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "L4-E28",
+          "nombre": "Mercado Santa Anita",
+          "orden": 28,
+          "distrito": "Santa Anita",
+          "estado": "planificada",
+          "referencias": ["Mercado Santa Anita", "Santa Anita"],
+          "estaciones_cercanas": []
+        }
+      ]
+    },
+    {
+      "id": "MET",
+      "nombre": "Metropolitano",
+      "color": "Naranja",
+      "tipo": "BRT (Bus Rapid Transit)",
+      "operativa": true,
+      "inicio": "Terminal Naranjal",
+      "fin": "Terminal Matellini",
+      "horario_semana": "05:00 - 23:00",
+      "horario_domingo": "05:00 - 22:00",
+      "tarifa": 2.70,
+      "estaciones": [
+        {
+          "id": "MET-E01",
+          "nombre": "Terminal Naranjal",
+          "orden": 1,
+          "distrito": "Independencia",
+          "estado": "operativa",
+          "referencias": ["Av. Túpac Amaru", "Independencia", "Comas"],
+          "estaciones_cercanas": [
+            {
+              "estacion": "Naranjal",
+              "linea": "L3",
+              "distancia_metros": 100,
+              "nota": "Conexión futura con Línea 3"
+            }
+          ]
+        },
+        {
+          "id": "MET-E02",
+          "nombre": "Izaguirre",
+          "orden": 2,
+          "distrito": "Los Olivos",
+          "estado": "operativa",
+          "referencias": ["Av. Carlos Izaguirre", "Los Olivos"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "MET-E03",
+          "nombre": "Chimpu Ocllo",
+          "orden": 3,
+          "distrito": "Los Olivos",
+          "estado": "operativa",
+          "referencias": ["Av. Chimpu Ocllo", "Los Olivos"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "MET-E04",
+          "nombre": "Los Jazmines",
+          "orden": 4,
+          "distrito": "Los Olivos",
+          "estado": "operativa",
+          "referencias": ["Av. Los Jazmines", "Los Olivos"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "MET-E05",
+          "nombre": "Tomás Valle",
+          "orden": 5,
+          "distrito": "Los Olivos",
+          "estado": "operativa",
+          "referencias": ["Av. Tomás Valle", "Los Olivos"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "MET-E06",
+          "nombre": "Universitaria",
+          "orden": 6,
+          "distrito": "San Martín de Porres",
+          "estado": "operativa",
+          "referencias": ["Av. Universitaria", "SMP"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "MET-E07",
+          "nombre": "Honorio Delgado",
+          "orden": 7,
+          "distrito": "San Martín de Porres",
+          "estado": "operativa",
+          "referencias": ["Hospital Honorio Delgado", "SMP"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "MET-E08",
+          "nombre": "Caquetá",
+          "orden": 8,
+          "distrito": "Rímac",
+          "estado": "operativa",
+          "referencias": ["Av. Caquetá", "Mercado de Caquetá", "Rímac"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "MET-E09",
+          "nombre": "Plaza de Armas",
+          "orden": 9,
+          "distrito": "Lima",
+          "estado": "operativa",
+          "referencias": ["Plaza de Armas", "Palacio de Gobierno", "Centro Histórico"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "MET-E10",
+          "nombre": "Estación Central",
+          "orden": 10,
+          "distrito": "Lima",
+          "estado": "operativa",
+          "referencias": ["Paseo Colón", "Av. España", "Centro de Lima"],
+          "estaciones_cercanas": [
+            {
+              "estacion": "Estación Central",
+              "linea": "L2",
+              "distancia_metros": 200,
+              "nota": "Conexión futura con Línea 2"
+            },
+            {
+              "estacion": "Estación Central",
+              "linea": "L3",
+              "distancia_metros": 200,
+              "nota": "Conexión futura con Línea 3"
+            }
+          ]
+        },
+        {
+          "id": "MET-E11",
+          "nombre": "Colmena",
+          "orden": 11,
+          "distrito": "Lima",
+          "estado": "operativa",
+          "referencias": ["Av. La Colmena", "Centro de Lima"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "MET-E12",
+          "nombre": "Quilca",
+          "orden": 12,
+          "distrito": "Lima",
+          "estado": "operativa",
+          "referencias": ["Jr. Quilca", "Centro de Lima"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "MET-E13",
+          "nombre": "Canadá",
+          "orden": 13,
+          "distrito": "Lima",
+          "estado": "operativa",
+          "referencias": ["Av. Canadá", "La Victoria"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "MET-E14",
+          "nombre": "Javier Prado",
+          "orden": 14,
+          "distrito": "San Isidro",
+          "estado": "operativa",
+          "referencias": ["Av. Javier Prado Oeste", "San Isidro"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "MET-E15",
+          "nombre": "Aramburú",
+          "orden": 15,
+          "distrito": "San Isidro",
+          "estado": "operativa",
+          "referencias": ["Av. Andrés Aramburú", "San Isidro"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "MET-E16",
+          "nombre": "Cortijo",
+          "orden": 16,
+          "distrito": "San Isidro",
+          "estado": "operativa",
+          "referencias": ["Av. Cortijo", "San Isidro"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "MET-E17",
+          "nombre": "Domingo Orué",
+          "orden": 17,
+          "distrito": "Surquillo",
+          "estado": "operativa",
+          "referencias": ["Av. Domingo Orué", "Surquillo"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "MET-E18",
+          "nombre": "Angamos",
+          "orden": 18,
+          "distrito": "Miraflores",
+          "estado": "operativa",
+          "referencias": ["Av. Angamos", "Miraflores", "Surquillo"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "MET-E19",
+          "nombre": "Ricardo Palma",
+          "orden": 19,
+          "distrito": "Miraflores",
+          "estado": "operativa",
+          "referencias": ["Av. Ricardo Palma", "Miraflores", "Parque Kennedy"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "MET-E20",
+          "nombre": "Benavides",
+          "orden": 20,
+          "distrito": "Miraflores",
+          "estado": "operativa",
+          "referencias": ["Av. Benavides", "Miraflores"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "MET-E21",
+          "nombre": "Balta",
+          "orden": 21,
+          "distrito": "Miraflores",
+          "estado": "operativa",
+          "referencias": ["Av. José Balta", "Miraflores"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "MET-E22",
+          "nombre": "República de Panamá",
+          "orden": 22,
+          "distrito": "Surquillo",
+          "estado": "operativa",
+          "referencias": ["Av. República de Panamá", "Surquillo"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "MET-E23",
+          "nombre": "Tomás Marsano",
+          "orden": 23,
+          "distrito": "Santiago de Surco",
+          "estado": "operativa",
+          "referencias": ["Av. Tomás Marsano", "Surco"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "MET-E24",
+          "nombre": "Higuereta",
+          "orden": 24,
+          "distrito": "Santiago de Surco",
+          "estado": "operativa",
+          "referencias": ["Av. Higuereta", "Surco"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "MET-E25",
+          "nombre": "Jorge Chávez",
+          "orden": 25,
+          "distrito": "Santiago de Surco",
+          "estado": "operativa",
+          "referencias": ["Av. Jorge Chávez", "Surco"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "MET-E26",
+          "nombre": "Góticos",
+          "orden": 26,
+          "distrito": "Santiago de Surco",
+          "estado": "operativa",
+          "referencias": ["Av. Góticos", "Surco"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "MET-E27",
+          "nombre": "Ayacucho",
+          "orden": 27,
+          "distrito": "Santiago de Surco",
+          "estado": "operativa",
+          "referencias": ["Av. Ayacucho", "Surco"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "MET-E28",
+          "nombre": "Primavera",
+          "orden": 28,
+          "distrito": "Santiago de Surco",
+          "estado": "operativa",
+          "referencias": ["Av. Primavera", "Surco"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "MET-E29",
+          "nombre": "Croniquillas",
+          "orden": 29,
+          "distrito": "Santiago de Surco",
+          "estado": "operativa",
+          "referencias": ["Av. Croniquillas", "Surco"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "MET-E30",
+          "nombre": "La Ronda",
+          "orden": 30,
+          "distrito": "Santiago de Surco",
+          "estado": "operativa",
+          "referencias": ["Av. La Ronda", "Surco"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "MET-E31",
+          "nombre": "El Derby",
+          "orden": 31,
+          "distrito": "Santiago de Surco",
+          "estado": "operativa",
+          "referencias": ["Av. El Derby", "Surco"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "MET-E32",
+          "nombre": "Monterrico",
+          "orden": 32,
+          "distrito": "Santiago de Surco",
+          "estado": "operativa",
+          "referencias": ["Monterrico", "Jockey Plaza", "Surco"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "MET-E33",
+          "nombre": "Villasol",
+          "orden": 33,
+          "distrito": "Santiago de Surco",
+          "estado": "operativa",
+          "referencias": ["Av. Villasol", "Surco"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "MET-E34",
+          "nombre": "Alipio Ponce",
+          "orden": 34,
+          "distrito": "Santiago de Surco",
+          "estado": "operativa",
+          "referencias": ["Av. Alipio Ponce", "Surco"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "MET-E35",
+          "nombre": "Andrés Tinoco",
+          "orden": 35,
+          "distrito": "Santiago de Surco",
+          "estado": "operativa",
+          "referencias": ["Av. Andrés Tinoco", "Surco"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "MET-E36",
+          "nombre": "Benavides 2",
+          "orden": 36,
+          "distrito": "Chorrillos",
+          "estado": "operativa",
+          "referencias": ["Av. Benavides", "Chorrillos"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "MET-E37",
+          "nombre": "Bulevar",
+          "orden": 37,
+          "distrito": "Chorrillos",
+          "estado": "operativa",
+          "referencias": ["Av. Bulevar", "Chorrillos"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "MET-E38",
+          "nombre": "Los Héroes",
+          "orden": 38,
+          "distrito": "San Juan de Miraflores",
+          "estado": "operativa",
+          "referencias": ["Av. Los Héroes", "SJM"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "MET-E39",
+          "nombre": "Atocongo",
+          "orden": 39,
+          "distrito": "San Juan de Miraflores",
+          "estado": "operativa",
+          "referencias": ["Av. Atocongo", "SJM"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "MET-E40",
+          "nombre": "San Juan",
+          "orden": 40,
+          "distrito": "San Juan de Miraflores",
+          "estado": "operativa",
+          "referencias": ["Av. San Juan", "SJM"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "MET-E41",
+          "nombre": "Pumacahua",
+          "orden": 41,
+          "distrito": "Chorrillos",
+          "estado": "operativa",
+          "referencias": ["Av. Pumacahua", "Chorrillos"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "MET-E42",
+          "nombre": "Plaza Flores",
+          "orden": 42,
+          "distrito": "Barranco",
+          "estado": "operativa",
+          "referencias": ["Barranco", "Av. Grau"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "MET-E43",
+          "nombre": "Escuela Militar",
+          "orden": 43,
+          "distrito": "Chorrillos",
+          "estado": "operativa",
+          "referencias": ["Escuela Militar de Chorrillos", "Chorrillos"],
+          "estaciones_cercanas": []
+        },
+        {
+          "id": "MET-E44",
+          "nombre": "Terminal Matellini",
+          "orden": 44,
+          "distrito": "Chorrillos",
+          "estado": "operativa",
+          "referencias": ["Av. Matellini", "Chorrillos"],
           "estaciones_cercanas": []
         }
       ]
