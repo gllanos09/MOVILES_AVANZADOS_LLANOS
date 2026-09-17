@@ -2306,6 +2306,231 @@ func submenuTarjeta() {
     }
 }
 
+// ─── MODO ADMINISTRADOR ──────────────────────────────────────
+let claveAdmin = "admin123"
+var intentosAdmin = 0
+let maxIntentosAdmin = 3
+
+func verificarAdmin() -> Bool {
+    intentosAdmin = 0
+    while intentosAdmin < maxIntentosAdmin {
+        print("\nIngresa la contraseña de administrador: ", terminator: "")
+        let input = readLine() ?? ""
+        if input == claveAdmin {
+            print("\n✅ Acceso concedido. Bienvenido, administrador.")
+            return true
+        }
+        intentosAdmin += 1
+        let restantes = maxIntentosAdmin - intentosAdmin
+        if restantes > 0 {
+            print("❌ Contraseña incorrecta. Intentos restantes: \(restantes)")
+        }
+    }
+    print("\n🔒 Demasiados intentos fallidos. Regresando al menú principal.")
+    return false
+}
+
+// ─── INSERTAR ESTACIÓN ───────────────────────────────────────
+func insertarEstacion() {
+    // Elegir línea
+    print("\n¿En qué línea deseas insertar la estación?")
+    for (i, linea) in lineas.enumerated() {
+        let nombre = linea["nombre"] as? String ?? ""
+        let total  = (linea["estaciones"] as? [[String: Any]])?.count ?? 0
+        print("  \(i + 1). \(nombre) (\(total) estaciones)")
+    }
+    print("  0. Cancelar")
+    print("\nOpción: ", terminator: "")
+
+    let inputLinea = readLine() ?? ""
+    guard let opcionLinea = Int(inputLinea), opcionLinea >= 1, opcionLinea <= lineas.count else {
+        if inputLinea == "0" { return }
+        print("⚠️  Opción inválida.")
+        return
+    }
+
+    let lineaIndex = opcionLinea - 1
+    guard var estaciones = lineas[lineaIndex]["estaciones"] as? [[String: Any]] else { return }
+    let lineaId = lineas[lineaIndex]["id"] as? String ?? ""
+
+    // Mostrar estaciones actuales
+    print("\nEstaciones actuales:")
+    for est in estaciones {
+        let orden  = est["orden"]  as? Int    ?? 0
+        let nombre = est["nombre"] as? String ?? ""
+        print("  \(orden). \(nombre)")
+    }
+
+    // Elegir posición
+    print("\n¿Dónde deseas insertar la nueva estación?")
+    print("  1. Al final de la línea")
+    print("  2. Entre dos estaciones existentes")
+    print("\nOpción: ", terminator: "")
+
+    let inputPos = readLine() ?? ""
+    var ordenInsercion = estaciones.count + 1
+
+    if inputPos == "2" {
+        print("\n¿Antes o después de qué estación?")
+        print("  1. Antes de una estación")
+        print("  2. Después de una estación")
+        print("\nOpción: ", terminator: "")
+        let inputAntesDespues = readLine() ?? ""
+
+        print("\nNúmero de estación de referencia (1-\(estaciones.count)): ", terminator: "")
+        let inputOrden = readLine() ?? ""
+        guard let ordenRef = Int(inputOrden), ordenRef >= 1, ordenRef <= estaciones.count else {
+            print("⚠️  Número inválido.")
+            return
+        }
+
+        if inputAntesDespues == "1" {
+            // Antes — la nueva toma el orden de la referencia
+            ordenInsercion = ordenRef
+        } else {
+            // Después — la nueva toma el orden siguiente
+            ordenInsercion = ordenRef + 1
+        }
+
+        // Reordenar estaciones que vienen desde la posición de inserción
+        for i in 0..<estaciones.count {
+            if let orden = estaciones[i]["orden"] as? Int, orden >= ordenInsercion {
+                estaciones[i]["orden"] = orden + 1
+            }
+        }
+    }
+
+    // Datos de la nueva estación
+    print("\nNombre de la nueva estación: ", terminator: "")
+    let nombre = readLine() ?? ""
+    guard !nombre.isEmpty else {
+        print("⚠️  El nombre no puede estar vacío.")
+        return
+    }
+
+    print("Distrito: ", terminator: "")
+    let distrito = readLine() ?? ""
+
+    print("Estado (operativa / en_construccion / planificada): ", terminator: "")
+    let estadoInput = readLine() ?? ""
+    let estadosValidos = ["operativa", "en_construccion", "planificada"]
+    let estado = estadosValidos.contains(estadoInput) ? estadoInput : "planificada"
+
+    print("Referencias (separadas por coma): ", terminator: "")
+    let refsInput = readLine() ?? ""
+    let referencias = refsInput.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }
+
+    // Generar ID
+    let nuevoId = "\(lineaId)-E\(String(format: "%02d", ordenInsercion))N"
+
+    // Crear nueva estación
+    let nuevaEstacion: [String: Any] = [
+        "id": nuevoId,
+        "nombre": nombre,
+        "orden": ordenInsercion,
+        "distrito": distrito,
+        "estado": estado,
+        "referencias": referencias,
+        "estaciones_cercanas": []
+    ]
+
+    // Insertar en la posición correcta
+    estaciones.append(nuevaEstacion)
+    estaciones.sort { ($0["orden"] as? Int ?? 0) < ($1["orden"] as? Int ?? 0) }
+    lineas[lineaIndex]["estaciones"] = estaciones
+
+    print("\n✅ Estación '\(nombre)' insertada en posición \(ordenInsercion) de \(lineas[lineaIndex]["nombre"] as? String ?? "").")
+}
+
+// ─── CREAR NUEVA LÍNEA ───────────────────────────────────────
+func crearNuevaLinea() {
+    print("\n── CREAR NUEVA LÍNEA ──────────────────────")
+
+    print("ID de la línea (ej: L5): ", terminator: "")
+    let id = readLine() ?? ""
+    guard !id.isEmpty else {
+        print("⚠️  El ID no puede estar vacío.")
+        return
+    }
+
+    // Verificar que no exista ya
+    if lineas.contains(where: { $0["id"] as? String == id }) {
+        print("⚠️  Ya existe una línea con ese ID.")
+        return
+    }
+
+    print("Nombre (ej: Línea 5): ", terminator: "")
+    let nombre = readLine() ?? ""
+
+    print("Color (ej: Morado): ", terminator: "")
+    let color = readLine() ?? ""
+
+    print("Tipo (ej: Subterráneo / Elevado / BRT): ", terminator: "")
+    let tipo = readLine() ?? ""
+
+    print("Estación de inicio: ", terminator: "")
+    let inicio = readLine() ?? ""
+
+    print("Estación final: ", terminator: "")
+    let fin = readLine() ?? ""
+
+    print("Horario semana (ej: 05:00 - 22:00): ", terminator: "")
+    let horarioSemana = readLine() ?? ""
+
+    print("Horario domingo (ej: 05:30 - 22:00): ", terminator: "")
+    let horarioDomingo = readLine() ?? ""
+
+    print("Tarifa en soles (ej: 1.50): ", terminator: "")
+    let tarifaInput = readLine() ?? ""
+    let tarifa = Double(tarifaInput) ?? 0.0
+
+    let nuevaLinea: [String: Any] = [
+        "id": id,
+        "nombre": nombre,
+        "color": color,
+        "tipo": tipo,
+        "operativa": false,
+        "inicio": inicio,
+        "fin": fin,
+        "horario_semana": horarioSemana,
+        "horario_domingo": horarioDomingo,
+        "tarifa": tarifa,
+        "estaciones": []
+    ]
+
+    lineas.append(nuevaLinea)
+    print("\n✅ Línea '\(nombre)' creada correctamente.")
+    print("   Ahora puedes insertar estaciones en ella desde la opción 1.")
+}
+
+// ─── SUBMENÚ ADMIN ───────────────────────────────────────────
+func submenuAdmin() {
+    var continuar = true
+    while continuar {
+        print("\n══════════════════════════════════════════")
+        print("       🔐 MODO ADMINISTRADOR              ")
+        print("══════════════════════════════════════════")
+        print("  1. Insertar estación en una línea")
+        print("  2. Crear nueva línea")
+        print("  3. Ver todas las líneas")
+        print("  0. Salir del modo admin")
+        print("══════════════════════════════════════════")
+        print("Opción: ", terminator: "")
+
+        let input = readLine() ?? ""
+        switch input {
+        case "1": insertarEstacion()
+        case "2": crearNuevaLinea()
+        case "3":
+            for linea in lineas {
+                mostrarInfoLinea(linea)
+            }
+        case "0": continuar = false
+        default:  print("⚠️  Opción no válida.")
+        }
+    }
+}
+
 // ─── MENÚ PRINCIPAL ──────────────────────────────────────────
 func mostrarMenu() {
     print("\n══════════════════════════════════════════")
@@ -2317,6 +2542,7 @@ func mostrarMenu() {
     print("  4. Información de una línea")
     print("  5. ¿Cómo llegar a...?")
     print("  6. Gestionar tarjeta de transporte")
+    print("  7. Modo administrador")
     print("  0. Salir")
     print("══════════════════════════════════════════")
     print("Opción: ", terminator: "")
@@ -2346,6 +2572,10 @@ func iniciar() {
             opcionComoLlegar()
         case "6":
             submenuTarjeta()
+        case "7":
+            if verificarAdmin() {
+                submenuAdmin()
+            }
         case "0":
             continuar = false
             print("\n👋 ¡Hasta luego! Gracias por usar Metro de Lima.")
