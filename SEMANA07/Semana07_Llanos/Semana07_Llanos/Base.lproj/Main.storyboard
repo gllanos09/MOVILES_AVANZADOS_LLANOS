@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="24506" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="cbL-pE-pNE">
+    <device id="retina6_12" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="24504"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--Culturas Peruanas-->
+        <scene sceneID="tne-QT-ifu">
+            <objects>
+                <viewController id="BYZ-38-t0r" storyboardIdentifier="ViewController" customClass="ViewController" customModule="Semana07_Llanos" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
+                        <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="90" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="FvB-q4-JCf" userLabel="Tabla Culturas">
+                                <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
+                                <accessibility key="accessibilityConfiguration" identifier="tablaCulturas"/>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                <prototypes>
+                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" selectionStyle="default" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="celdaCultura" rowHeight="90" accessoryType="disclosureIndicator" id="p3Y-qp-m9p" userLabel="Celda Cultura" customClass="CulturaTableViewCell" customModule="Semana07_Llanos" customModuleProvider="target">
+                                        <rect key="frame" x="0.0" y="50" width="393" height="90"/>
+                                        <accessibility key="accessibilityConfiguration" identifier="celdaCultura"/>
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="p3Y-qp-m9p" id="c8i-EK-QmP">
+                                            <rect key="frame" x="0.0" y="0.0" width="393" height="90"/>
+                                            <autoresizingMask key="autoresizingMask"/>
+                                            <subviews>
+                                                <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="hrx-ZZ-ILG" userLabel="Imagen Cultura">
+                                                    <rect key="frame" x="16" y="10" width="70" height="70"/>
+                                                    <accessibility key="accessibilityConfiguration" identifier="imgCultura"/>
+                                                    <constraints>
+                                                        <constraint firstAttribute="width" constant="70" id="wUR-jd-ePk"/>
+                                                        <constraint firstAttribute="height" constant="70" id="HzH-hJ-2K7"/>
+                                                    </constraints>
+                                                    <userDefinedRuntimeAttributes>
+                                                        <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
+                                                            <real key="value" value="10"/>
+                                                        </userDefinedRuntimeAttribute>
+                                                    </userDefinedRuntimeAttributes>
+                                                </imageView>
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Nombre de la cultura" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Efj-4O-pJi" userLabel="Nombre Cultura">
+                                                    <rect key="frame" x="102" y="34" width="275" height="22"/>
+                                                    <accessibility key="accessibilityConfiguration" identifier="lblNombre"/>
+                                                    <fontDescription key="fontDescription" style="UICTFontTextStyleHeadline"/>
+                                                    <nil key="textColor"/>
+                                                    <nil key="highlightedColor"/>
+                                                </label>
+                                            </subviews>
+                                            <constraints>
+                                                <constraint firstItem="hrx-ZZ-ILG" firstAttribute="leading" secondItem="c8i-EK-QmP" secondAttribute="leading" constant="16" id="8SQ-IW-LdL"/>
+                                                <constraint firstItem="hrx-ZZ-ILG" firstAttribute="centerY" secondItem="c8i-EK-QmP" secondAttribute="centerY" id="eLN-Fd-yNG"/>
+                                                <constraint firstItem="Efj-4O-pJi" firstAttribute="leading" secondItem="hrx-ZZ-ILG" secondAttribute="trailing" constant="16" id="RYT-5r-agx"/>
+                                                <constraint firstItem="Efj-4O-pJi" firstAttribute="centerY" secondItem="c8i-EK-QmP" secondAttribute="centerY" id="Ha5-W5-LR3"/>
+                                                <constraint firstAttribute="trailing" secondItem="Efj-4O-pJi" secondAttribute="trailing" constant="16" id="n2F-7c-Qa8"/>
+                                            </constraints>
+                                        </tableViewCellContentView>
+                                        <connections>
+                                            <outlet property="imgCultura" destination="hrx-ZZ-ILG" id="c1V-8j-Rt4"/>
+                                            <outlet property="lblNombre" destination="Efj-4O-pJi" id="d2W-9k-Su5"/>
+                                            <segue destination="Zq1-Dv-c01" kind="show" identifier="verDetalle" id="e3X-0m-Tv6"/>
+                                        </connections>
+                                    </tableViewCell>
+                                </prototypes>
+                                <connections>
+                                    <outlet property="dataSource" destination="BYZ-38-t0r" id="f4Y-1n-Uw7"/>
+                                    <outlet property="delegate" destination="BYZ-38-t0r" id="g5Z-2p-Vx8"/>
+                                </connections>
+                            </tableView>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="FvB-q4-JCf" firstAttribute="top" secondItem="8bC-Xf-vdC" secondAttribute="top" id="tOz-h7-PJw"/>
+                            <constraint firstItem="FvB-q4-JCf" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="gYK-J1-Rvt"/>
+                            <constraint firstItem="FvB-q4-JCf" firstAttribute="trailing" secondItem="6Tk-OE-BBY" secondAttribute="trailing" id="6go-Wb-ACc"/>
+                            <constraint firstAttribute="bottom" secondItem="FvB-q4-JCf" secondAttribute="bottom" id="Qkl-R7-Zad"/>
+                        </constraints>
+                    </view>
+                    <navigationItem key="navigationItem" title="Culturas Peruanas" id="1Tv-1A-PfP"/>
+                    <connections>
+                        <outlet property="tablaCulturas" destination="FvB-q4-JCf" id="h6a-3q-Wy9"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1954.9618320610687" y="86.619718309859152"/>
+        </scene>
+        <!--Navigation Controller-->
+        <scene sceneID="Din-9h-5tK">
+            <objects>
+                <navigationController automaticallyAdjustsScrollViewInsets="NO" id="cbL-pE-pNE" storyboardIdentifier="NavigationController" sceneMemberID="viewController">
+                    <toolbarItems/>
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="WII-D4-toc">
+                        <rect key="frame" x="0.0" y="118" width="393" height="54"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <nil name="viewControllers"/>
+                    <connections>
+                        <segue destination="BYZ-38-t0r" kind="relationship" relationship="rootViewController" id="1SY-gW-9VD"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="Oj7-of-f4k" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1028.2442748091603" y="86.619718309859152"/>
+        </scene>
+        <!--Detalle View Controller-->
+        <scene sceneID="Zq1-Dv-s01">
+            <objects>
+                <viewController id="Zq1-Dv-c01" storyboardIdentifier="DetalleViewController" customClass="DetalleViewController" customModule="Semana07_Llanos" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="Zq1-Dv-v01">
+                        <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="16" translatesAutoresizingMaskIntoConstraints="NO" id="Zq1-Dv-k01" userLabel="Stack Detalle">
+                                <rect key="frame" x="20" y="79" width="353" height="391"/>
+                                <accessibility key="accessibilityConfiguration" identifier="stackDetalle"/>
+                                <subviews>
+                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="Zq1-Dv-i01" userLabel="Imagen Detalle">
+                                        <rect key="frame" x="0.0" y="0.0" width="353" height="220"/>
+                                        <accessibility key="accessibilityConfiguration" identifier="imgDetalle"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="220" id="Zq1-Dv-ih1"/>
+                                        </constraints>
+                                        <userDefinedRuntimeAttributes>
+                                            <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
+                                                <real key="value" value="12"/>
+                                            </userDefinedRuntimeAttribute>
+                                        </userDefinedRuntimeAttributes>
+                                    </imageView>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Nombre" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Zq1-Dv-n01" userLabel="Nombre Cultura">
+                                        <rect key="frame" x="0.0" y="236" width="353" height="41"/>
+                                        <accessibility key="accessibilityConfiguration" identifier="lblNombre"/>
+                                        <fontDescription key="fontDescription" style="UICTFontTextStyleTitle1"/>
+                                        <color key="textColor" name="AccentColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Region" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Zq1-Dv-r01" userLabel="Region">
+                                        <rect key="frame" x="0.0" y="293" width="353" height="20"/>
+                                        <accessibility key="accessibilityConfiguration" identifier="lblRegion"/>
+                                        <fontDescription key="fontDescription" style="UICTFontTextStyleSubhead"/>
+                                        <color key="textColor" systemColor="secondaryLabelColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" verticalHuggingPriority="251" text="Descripcion de la cultura" textAlignment="natural" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Zq1-Dv-d01" userLabel="Descripcion">
+                                        <rect key="frame" x="0.0" y="329" width="353" height="62"/>
+                                        <accessibility key="accessibilityConfiguration" identifier="lblDescripcion"/>
+                                        <fontDescription key="fontDescription" style="UICTFontTextStyleBody"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Zq1-Dv-b01" userLabel="Boton Que Ofrece">
+                                        <rect key="frame" x="0.0" y="407" width="353" height="50"/>
+                                        <accessibility key="accessibilityConfiguration" identifier="btnQueOfrece"/>
+                                        <color key="backgroundColor" name="AccentColor"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="50" id="Zq1-Dv-bh1"/>
+                                        </constraints>
+                                        <fontDescription key="fontDescription" style="UICTFontTextStyleHeadline"/>
+                                        <state key="normal" title="Ver qué ofrece">
+                                            <color key="titleColor" systemColor="systemBackgroundColor"/>
+                                        </state>
+                                        <userDefinedRuntimeAttributes>
+                                            <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
+                                                <real key="value" value="12"/>
+                                            </userDefinedRuntimeAttribute>
+                                        </userDefinedRuntimeAttributes>
+                                        <connections>
+                                            <segue destination="Apr-Vc-001" kind="show" identifier="verAportes" id="Zq1-Dv-sg2"/>
+                                        </connections>
+                                    </button>
+                                </subviews>
+                            </stackView>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="Zq1-Dv-a01"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="Zq1-Dv-k01" firstAttribute="top" secondItem="Zq1-Dv-a01" secondAttribute="top" constant="20" id="Zq1-Dv-ct1"/>
+                            <constraint firstItem="Zq1-Dv-k01" firstAttribute="leading" secondItem="Zq1-Dv-a01" secondAttribute="leading" constant="20" id="Zq1-Dv-cl1"/>
+                            <constraint firstItem="Zq1-Dv-a01" firstAttribute="trailing" secondItem="Zq1-Dv-k01" secondAttribute="trailing" constant="20" id="Zq1-Dv-cr1"/>
+                        </constraints>
+                    </view>
+                    <navigationItem key="navigationItem" id="Zq1-Dv-ni1"/>
+                    <connections>
+                        <outlet property="imgDetalle" destination="Zq1-Dv-i01" id="Zq1-Dv-o01"/>
+                        <outlet property="btnQueOfrece" destination="Zq1-Dv-b01" id="Zq1-Dv-o05"/>
+                        <outlet property="lblDescripcion" destination="Zq1-Dv-d01" id="Zq1-Dv-o02"/>
+                        <outlet property="lblNombre" destination="Zq1-Dv-n01" id="Zq1-Dv-o03"/>
+                        <outlet property="lblRegion" destination="Zq1-Dv-r01" id="Zq1-Dv-o04"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="Zq1-Dv-f01" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="2880" y="86.619718309859152"/>
+        </scene>
+        <!--Qué ofrece-->
+        <scene sceneID="Apr-Sc-001">
+            <objects>
+                <viewController storyboardIdentifier="AportesViewController" id="Apr-Vc-001" customClass="AportesViewController" customModule="Semana07_Llanos" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="Apr-Vw-001">
+                        <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="insetGrouped" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="18" estimatedSectionHeaderHeight="-1" sectionFooterHeight="18" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="Apr-Tb-001" userLabel="Tabla Aportes">
+                                <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
+                                <accessibility key="accessibilityConfiguration" identifier="tablaAportes"/>
+                                <color key="backgroundColor" systemColor="systemGroupedBackgroundColor"/>
+                                <prototypes>
+                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" selectionStyle="none" hidesAccessoryWhenEditing="NO" indentationWidth="10" reuseIdentifier="celdaAporte" id="Apr-Cl-001" userLabel="Celda Aporte" style="IBUITableViewCellStyleSubtitle">
+                                        <rect key="frame" x="20" y="59.5" width="353" height="60"/>
+                                        <accessibility key="accessibilityConfiguration" identifier="celdaAporte"/>
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="Apr-Cl-001" id="Apr-Cv-001">
+                                            <rect key="frame" x="0.0" y="0.0" width="353" height="60"/>
+                                            <autoresizingMask key="autoresizingMask"/>
+                                        </tableViewCellContentView>
+                                    </tableViewCell>
+                                </prototypes>
+                                <connections>
+                                    <outlet property="dataSource" destination="Apr-Vc-001" id="Apr-Ds-001"/>
+                                    <outlet property="delegate" destination="Apr-Vc-001" id="Apr-Dl-001"/>
+                                </connections>
+                            </tableView>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="Apr-Sa-001"/>
+                        <color key="backgroundColor" systemColor="systemGroupedBackgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="Apr-Tb-001" firstAttribute="top" secondItem="Apr-Vw-001" secondAttribute="top" id="Apr-Ct-001"/>
+                            <constraint firstItem="Apr-Tb-001" firstAttribute="leading" secondItem="Apr-Sa-001" secondAttribute="leading" id="Apr-Ct-002"/>
+                            <constraint firstItem="Apr-Sa-001" firstAttribute="trailing" secondItem="Apr-Tb-001" secondAttribute="trailing" id="Apr-Ct-003"/>
+                            <constraint firstAttribute="bottom" secondItem="Apr-Tb-001" secondAttribute="bottom" id="Apr-Ct-004"/>
+                        </constraints>
+                    </view>
+                    <navigationItem key="navigationItem" id="Apr-Ni-001"/>
+                    <connections>
+                        <outlet property="tablaAportes" destination="Apr-Tb-001" id="Apr-Ou-001"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="Apr-Fr-001" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="3800" y="86.619718309859152"/>
+        </scene>
+    </scenes>
+    <resources>
+        <namedColor name="AccentColor">
+            <color red="0.76078431372549021" green="0.35294117647058826" blue="0.20392156862745098" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <systemColor name="secondaryLabelColor">
+            <color red="0.23529411759999999" green="0.23529411759999999" blue="0.26274509799999999" alpha="0.59999999999999998" colorSpace="custom" customColorSpace="sRGB"/>
+        </systemColor>
+        <systemColor name="systemGroupedBackgroundColor">
+            <color red="0.94901960784313721" green="0.94901960784313721" blue="0.96862745098039216" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </systemColor>
+        <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+    </resources>
+</document>
