@@ -18,6 +18,12 @@ la otra expone la app.
   `DEVELOPER_DIR=/Users/pamela/Downloads/Xcode.app/Contents/Developer`.
 - Simulador para las capturas: **iPhone SE (3.ª generación)**. Es la pantalla
   más pequeña disponible, así que evidencia por qué el `ScrollView` es necesario.
+- El `project.pbxproj` de este laboratorio se escribió a mano con el formato de
+  la plantilla de Xcode 14.2 (`objectVersion = 56`). Compila con
+  `BUILD SUCCEEDED`. **Ojo:** el proyecto de `SEMANA03/Lab03-Colecciones` se
+  creó con Xcode 26 (`objectVersion = 77`, carpetas sincronizadas, deployment
+  26.2) y Xcode 14.2 **no puede abrirlo**. De ahí solo se copió la convención
+  de carpetas, no el formato del proyecto.
 
 ## Controles autorizados por el lab
 
@@ -152,7 +158,9 @@ que ya existe en este repo.
   atribución a Claude de ningún tipo.
 - Un commit por hito, como pide el lab: `params:`, `modelo:`, `calculo:`,
   `caso N verificado`, `ui:`, `excel:`, `docs:`.
-- Rama `main`, push directo.
+- Rama **`BoletaPago`**, no `main`. Este repo usa una rama por laboratorio
+  (`MetroLima` para SEMANA04, `PrestamoLibro`, `Democlase02`). La fusión a
+  `main` la decide el usuario.
 - La app debe decir **"Boleta de ejemplo"** en pantalla. Nada de DNI o RUC
   reales; trabajador y empresa son ficticios.
 - No se calcula retención de renta de 5.ª categoría (es nivel 3, opcional).
