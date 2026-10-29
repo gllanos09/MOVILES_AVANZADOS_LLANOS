@@ -40,11 +40,14 @@ Seleccionar el simulador iPhone SE (3.ª generación) y pulsar Run.
 ## Cómo correr las pruebas del motor
 
 Los archivos `Parametros.swift`, `Modelo.swift` y `Boleta.swift` solo importan
-`Foundation`, así que el cálculo se puede verificar sin abrir Xcode:
+`Foundation`, así que el cálculo se puede verificar sin abrir Xcode. Desde
+`SEMANA09/`:
 
 ```
 swiftc -O -o /tmp/pruebas-boleta \
-  fuente/Parametros.swift fuente/Modelo.swift fuente/Boleta.swift \
+  Lab09-BoletaPago/Lab09-BoletaPago/Parametros.swift \
+  Lab09-BoletaPago/Lab09-BoletaPago/Modelo.swift \
+  Lab09-BoletaPago/Lab09-BoletaPago/Boleta.swift \
   pruebas/main.swift && /tmp/pruebas-boleta
 ```
 
