@@ -138,6 +138,10 @@ SEMANA09/
   CLAUDE.md                          <- este archivo
   README.md                          <- con capturas del simulador
   Boleta_Pago.xlsx                   <- 4 hojas: Parametros, Boleta, Casos, Explicacion
+  capturas/                          <- formulario.png y boleta.png, del simulador
+  pruebas/
+    main.swift                       <- pruebas de consola. NO va en el target de Xcode:
+                                        tiene codigo de nivel superior y choca con el App
   Lab09-BoletaPago/
     Lab09-BoletaPago.xcodeproj
     Lab09-BoletaPago/
