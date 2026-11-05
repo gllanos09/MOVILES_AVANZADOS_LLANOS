@@ -7,7 +7,7 @@ static let shared = ModelContainerProvider()
 let container: ModelContainer // Contenedor principal de SwiftData
 private init() {
 // Esquema: las clases modelo que queremos persistir
-let schema = Schema([Alumno.self])
+    let schema = Schema([Alumno.self, Curso.self])
     do {
         // Dónde y cómo se guardará la base de datos SQLite
         let config = ModelConfiguration(

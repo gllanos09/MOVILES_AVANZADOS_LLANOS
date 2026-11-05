@@ -8,6 +8,7 @@ class Alumno {
     var apellido: String
     var nombre: String
     var dni: String
+    var curso: Curso?
     // Constructor que inicializa un nuevo objeto Alumno con los datos proporcionados
     init(idAlumno: UUID = UUID(), apellido: String, nombre: String, dni: String) {
         self.idAlumno = idAlumno
