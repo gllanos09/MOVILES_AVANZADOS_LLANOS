@@ -20,6 +20,7 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
         TablaContacto.delegate = self
         mostrarRutaBaseDeDatos()
         cargarInfoCoreData()
+        //probarRelacion()
     }
     
     func conexion() -> NSManagedObjectContext {
