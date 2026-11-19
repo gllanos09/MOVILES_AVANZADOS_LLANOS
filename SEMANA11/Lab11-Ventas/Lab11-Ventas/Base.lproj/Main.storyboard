@@ -2020,7 +2020,7 @@
         </scene>
     </scenes>
     <inferredMetricsTieBreakers>
-        <segue reference="fZ4-xa-aaa"/>
+        <segue reference="2G2-xa-aaa"/>
     </inferredMetricsTieBreakers>
     <resources>
         <image name="cart.badge.plus" catalog="system" width="128" height="106"/>
