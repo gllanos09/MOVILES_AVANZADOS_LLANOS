@@ -68,6 +68,6 @@ final class RegistroViewController: UIViewController {
         BaseDatos.shared.guardar()
 
         Sesion.shared.usuario = nuevo
-        sceneDelegate?.mostrarApp()
+        performSegue(withIdentifier: "entrarRegistro", sender: nil)   // entra directo al Tab Bar
     }
 }

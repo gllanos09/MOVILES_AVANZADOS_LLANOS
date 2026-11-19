@@ -23,8 +23,6 @@ final class CuentaViewController: UIViewController {
         rolValor.text = usuario?.rol ?? "-"
     }
 
-    @IBAction private func cerrarSesion() {
-        Sesion.shared.cerrar()
-        sceneDelegate?.mostrarLogin()
-    }
+    // Cerrar sesión no tiene código aquí: el botón está conectado en Main.storyboard a un
+    // unwind segue (Exit ▸ volverAlLogin:) que vuelve al login y borra la sesión.
 }

@@ -1,7 +1,8 @@
 import UIKit
 
 /// A1 · Inicio de sesión. La pantalla está en Main.storyboard (Storyboard ID "Login", escena inicial);
-/// el botón "Crear cuenta" abre A2 con un segue Show.
+/// el botón "Crear cuenta" abre A2 con un segue Show y, con datos válidos, el segue "entrar"
+/// abre el Tab Bar. Cerrar sesión en Cuenta regresa aquí con el unwind volverAlLogin.
 final class LoginViewController: UIViewController {
 
     @IBOutlet private weak var pila: UIStackView!
@@ -43,6 +44,15 @@ final class LoginViewController: UIViewController {
         }
         errorFila.isHidden = true
         Sesion.shared.usuario = usuarioValido
-        sceneDelegate?.mostrarApp()
+        performSegue(withIdentifier: "entrar", sender: nil)
+    }
+
+    /// Unwind segue del botón Cerrar sesión (pestaña Cuenta): borra la sesión y deja el
+    /// login vacío, como al abrir la app.
+    @IBAction func volverAlLogin(_ segue: UIStoryboardSegue) {
+        Sesion.shared.cerrar()
+        usuarioCampo.text = ""
+        claveCampo.text = ""
+        errorFila.isHidden = true
     }
 }
