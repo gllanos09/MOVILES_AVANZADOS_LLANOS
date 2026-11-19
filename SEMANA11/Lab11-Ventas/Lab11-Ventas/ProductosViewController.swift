@@ -1,11 +1,12 @@
 import UIKit
 
 /// A3 · Productos. El vendedor solo consulta y busca; el supervisor crea, edita y borra.
+/// La pantalla (búsqueda, chips, tabla con la celda "producto" y el botón +) está en Main.storyboard.
 final class ProductosViewController: UIViewController {
 
-    private let tabla = UITableView(frame: .zero, style: .plain)
-    private let chips = ChipsView()
-    private let buscador = UISearchController(searchResultsController: nil)
+    @IBOutlet private weak var tabla: UITableView!
+    @IBOutlet private weak var chips: ChipsView!
+    @IBOutlet private weak var buscador: UISearchBar!
     private var productos: [Producto] = []
     private var categorias: [String] = []
 
@@ -13,36 +14,13 @@ final class ProductosViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .systemBackground
 
-        if esSupervisor {
-            navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .add, target: self,
-                                                                action: #selector(agregarTocado))
+        // El botón + del storyboard es solo para el supervisor.
+        if !esSupervisor {
+            navigationItem.rightBarButtonItem = nil
         }
 
-        buscador.searchResultsUpdater = self
-        buscador.obscuresBackgroundDuringPresentation = false
-        buscador.searchBar.placeholder = "Buscar producto"
-        navigationItem.searchController = buscador
-        navigationItem.hidesSearchBarWhenScrolling = false
-
         chips.alCambiar = { [weak self] _ in self?.cargar() }
-
-        tabla.dataSource = self
-        tabla.delegate = self
-        tabla.rowHeight = 64
-        tabla.register(UITableViewCell.self, forCellReuseIdentifier: "producto")
-
-        let pila = UIStackView(arrangedSubviews: [chips, tabla])
-        pila.axis = .vertical
-        pila.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(pila)
-        NSLayoutConstraint.activate([
-            pila.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            pila.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-            pila.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            pila.trailingAnchor.constraint(equalTo: view.trailingAnchor)
-        ])
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -58,13 +36,13 @@ final class ProductosViewController: UIViewController {
         let todas = BaseDatos.shared.buscar(Producto.self).compactMap(\.categoria)
         categorias = Array(Set(todas)).sorted()
         let indice = seleccionActual.flatMap { categorias.firstIndex(of: $0) }.map { $0 + 1 } ?? 0
-        chips.configurar(opciones: ["Todas"] + categorias, seleccion: indice)
+        chips.configurar(opciones: ["Todos"] + categorias, seleccion: indice)
     }
 
     /// Búsqueda por nombre y filtro por categoría con NSPredicate.
     private func cargar() {
         var condiciones: [NSPredicate] = []
-        let texto = (buscador.searchBar.text ?? "").trimmingCharacters(in: .whitespaces)
+        let texto = (buscador.text ?? "").trimmingCharacters(in: .whitespaces)
         if !texto.isEmpty {
             condiciones.append(NSPredicate(format: "nombre CONTAINS[cd] %@", texto))
         }
@@ -79,7 +57,7 @@ final class ProductosViewController: UIViewController {
         tabla.reloadData()
     }
 
-    @objc private func agregarTocado() {
+    @IBAction private func agregarTocado() {
         mostrarFormulario(para: nil)
     }
 
@@ -131,28 +109,17 @@ extension ProductosViewController: UITableViewDataSource, UITableViewDelegate {
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let celda = tableView.dequeueReusableCell(withIdentifier: "producto", for: indexPath)
+        let celda = tableView.dequeueReusableCell(withIdentifier: ProductoCelda.id, for: indexPath) as! ProductoCelda
         let producto = productos[indexPath.row]
-
-        var contenido = UIListContentConfiguration.subtitleCell()
-        contenido.text = producto.nombre
-        contenido.secondaryText = "\(producto.categoria ?? "") · \(Formato.soles(producto.precio))"
-        contenido.secondaryTextProperties.color = .secondaryLabel
-        celda.contentConfiguration = contenido
-
-        // Stock en color: verde más de 10, ámbar de 6 a 10, rojo 5 o menos.
-        let etiqueta = UILabel()
-        etiqueta.text = "Stock \(producto.stock)"
-        etiqueta.font = .systemFont(ofSize: 13, weight: .semibold)
-        etiqueta.textColor = .white
-        etiqueta.textAlignment = .center
-        etiqueta.backgroundColor = colorDeStock(producto.stock)
-        etiqueta.layer.cornerRadius = 11
-        etiqueta.clipsToBounds = true
-        etiqueta.frame = CGRect(x: 0, y: 0, width: 84, height: 24)
-        celda.accessoryView = etiqueta
+        celda.configurar(con: producto, colorStock: colorDeStock(producto.stock))
         celda.selectionStyle = esSupervisor ? .default : .none
         return celda
+    }
+
+    func tableView(_ tableView: UITableView, titleForFooterInSection section: Int) -> String? {
+        esSupervisor
+            ? "Vista del supervisor. El vendedor solo consulta: sin \"+\" y sin borrar."
+            : "Vista del vendedor: solo consulta y búsqueda."
     }
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
@@ -183,8 +150,33 @@ extension ProductosViewController: UITableViewDataSource, UITableViewDelegate {
     }
 }
 
-extension ProductosViewController: UISearchResultsUpdating {
-    func updateSearchResults(for searchController: UISearchController) {
+extension ProductosViewController: UISearchBarDelegate {
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         cargar()
+    }
+
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        searchBar.resignFirstResponder()
+    }
+}
+
+/// A3 ④ · Fila con iniciales, nombre, categoría, precio y stock en color.
+/// Es la celda prototipo "producto" de Main.storyboard.
+final class ProductoCelda: UITableViewCell {
+    static let id = "producto"
+
+    @IBOutlet private weak var iniciales: Iniciales!
+    @IBOutlet private weak var nombre: UILabel!
+    @IBOutlet private weak var categoria: UILabel!
+    @IBOutlet private weak var precio: UILabel!
+    @IBOutlet private weak var stock: Pastilla!
+
+    /// Stock en color: verde más de 10, ámbar de 6 a 10, rojo 5 o menos.
+    func configurar(con producto: Producto, colorStock: UIColor) {
+        iniciales.mostrar(nombre: producto.nombre)
+        nombre.text = producto.nombre
+        categoria.text = producto.categoria
+        precio.text = Formato.soles(producto.precio)
+        stock.pintar("\(producto.stock) u.", colorStock)
     }
 }

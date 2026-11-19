@@ -1,54 +1,29 @@
 import UIKit
 
-/// Cuenta: nombre, usuario, rol y el botón Cerrar sesión.
+/// Cuenta: nombre, usuario, rol y el botón Cerrar sesión. La pantalla está en Main.storyboard.
 final class CuentaViewController: UIViewController {
+
+    @IBOutlet private weak var pila: UIStackView!
+    @IBOutlet private weak var avatar: UIStackView!
+    @IBOutlet private weak var iniciales: Iniciales!
+    @IBOutlet private weak var ultimaFila: UIView!
+    @IBOutlet private weak var nombreValor: UILabel!
+    @IBOutlet private weak var usuarioValor: UILabel!
+    @IBOutlet private weak var rolValor: UILabel!
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .systemBackground
-        let usuario = Sesion.shared.usuario
-
-        let avatar = UIImageView(image: UIImage(systemName: "person.crop.circle.fill"))
-        avatar.tintColor = .tintColor
-        avatar.contentMode = .scaleAspectFit
-        avatar.heightAnchor.constraint(equalToConstant: 80).isActive = true
-
-        let pila = UIStackView(arrangedSubviews: [
-            avatar,
-            fila("Nombre", usuario?.nombre),
-            fila("Usuario", usuario?.usuario),
-            fila("Rol", usuario?.rol)
-        ])
-        pila.axis = .vertical
-        pila.spacing = 12
         pila.setCustomSpacing(24, after: avatar)
+        pila.setCustomSpacing(32, after: ultimaFila)
 
-        let cerrar = UIButton.principal("Cerrar sesión")
-        cerrar.backgroundColor = .systemRed
-        cerrar.addTarget(self, action: #selector(cerrarSesion), for: .touchUpInside)
-        pila.addArrangedSubview(cerrar)
-        pila.setCustomSpacing(32, after: pila.arrangedSubviews[pila.arrangedSubviews.count - 2])
-
-        view.fijarEnScroll(pila)
+        let usuario = Sesion.shared.usuario
+        iniciales.mostrar(nombre: usuario?.nombre)
+        nombreValor.text = usuario?.nombre ?? "-"
+        usuarioValor.text = usuario?.usuario ?? "-"
+        rolValor.text = usuario?.rol ?? "-"
     }
 
-    private func fila(_ titulo: String, _ valor: String?) -> UIView {
-        let etiqueta = UILabel()
-        etiqueta.text = titulo
-        etiqueta.textColor = .secondaryLabel
-        let dato = UILabel()
-        dato.text = valor ?? "-"
-        dato.font = .systemFont(ofSize: 17, weight: .semibold)
-        dato.textAlignment = .right
-        let fila = UIStackView(arrangedSubviews: [etiqueta, dato])
-        fila.isLayoutMarginsRelativeArrangement = true
-        fila.layoutMargins = UIEdgeInsets(top: 12, left: 14, bottom: 12, right: 14)
-        fila.backgroundColor = .secondarySystemBackground
-        fila.layer.cornerRadius = 10
-        return fila
-    }
-
-    @objc private func cerrarSesion() {
+    @IBAction private func cerrarSesion() {
         Sesion.shared.cerrar()
         sceneDelegate?.mostrarLogin()
     }

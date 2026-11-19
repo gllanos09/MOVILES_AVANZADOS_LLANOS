@@ -3,71 +3,35 @@ import UIKit
 /// A6 · Mis ventas (vendedor: solo las suyas, sin anular).
 /// A7 · Ventas del equipo (supervisor: todas, chips por vendedor y deslizar para Anular).
 /// A8 · La anulación se pide con una alerta que exige motivo.
+/// En Main.storyboard hay dos escenas con esta clase: "Mis ventas" (indicadores) y
+/// "Ventas" (chips por vendedor). La segunda tiene el atributo Es Equipo = On.
 final class VentasViewController: UIViewController {
 
     enum Modo { case propias, equipo }
 
-    private let modo: Modo
-    private let tabla = UITableView(frame: .zero, style: .insetGrouped)
-    private let periodo = UISegmentedControl(items: ["Todas", "Hoy", "Mes"])
-    private let buscador = UISearchController(searchResultsController: nil)
-    private let chips = ChipsView()
-    private let indicadorHoy = IndicadorView(titulo: "Hoy")
-    private let indicadorMes = IndicadorView(titulo: "Este mes")
+    /// Se marca en el Attributes inspector del storyboard (User Defined Runtime Attribute).
+    @IBInspectable var esEquipo: Bool = false
+
+    private var modo: Modo { esEquipo ? .equipo : .propias }
+
+    @IBOutlet private weak var tabla: UITableView!
+    @IBOutlet private weak var periodo: UISegmentedControl!
+    // Solo existen en una de las dos escenas: chips en Ventas, indicadores en Mis ventas.
+    @IBOutlet private weak var chips: ChipsView?
+    @IBOutlet private weak var indicadorHoy: IndicadorView?
+    @IBOutlet private weak var indicadorMes: IndicadorView?
+    @IBOutlet private weak var buscador: UISearchBar!
 
     private var ventas: [Venta] = []
     private var vendedores: [Usuario] = []
 
-    init(modo: Modo) {
-        self.modo = modo
-        super.init(nibName: nil, bundle: nil)
-    }
-
-    required init?(coder: NSCoder) { fatalError("init(coder:) no se usa") }
+    private var seleccionDeChip: Int { chips?.seleccion ?? 0 }
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .systemGroupedBackground
 
-        buscador.searchResultsUpdater = self
-        buscador.obscuresBackgroundDuringPresentation = false
-        buscador.searchBar.placeholder = "Buscar por cliente"
-        navigationItem.searchController = buscador
-        navigationItem.hidesSearchBarWhenScrolling = false
-
-        periodo.selectedSegmentIndex = 0
-        periodo.addTarget(self, action: #selector(filtroCambio), for: .valueChanged)
-        chips.alCambiar = { [weak self] _ in self?.cargar() }
-
-        tabla.dataSource = self
-        tabla.delegate = self
-        tabla.register(VentaCelda.self, forCellReuseIdentifier: VentaCelda.id)
-        tabla.backgroundColor = .clear
-
-        var cabecera: [UIView] = []
-        if modo == .propias {
-            indicadorHoy.backgroundColor = .secondarySystemGroupedBackground
-            indicadorMes.backgroundColor = .secondarySystemGroupedBackground
-            let indicadores = UIStackView(arrangedSubviews: [indicadorHoy, indicadorMes])
-            indicadores.spacing = 12
-            indicadores.distribution = .fillEqually
-            cabecera.append(conMargen(indicadores))
-        } else {
-            cabecera.append(chips)
-        }
-        cabecera.append(conMargen(periodo))
-
-        let pila = UIStackView(arrangedSubviews: cabecera + [tabla])
-        pila.axis = .vertical
-        pila.spacing = 8
-        pila.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(pila)
-        NSLayoutConstraint.activate([
-            pila.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 8),
-            pila.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-            pila.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            pila.trailingAnchor.constraint(equalTo: view.trailingAnchor)
-        ])
+        ponerBotonDeCuenta()   // iniciales del usuario arriba a la derecha (CR / LP en la maqueta)
+        chips?.alCambiar = { [weak self] _ in self?.cargar() }
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -76,32 +40,20 @@ final class VentasViewController: UIViewController {
         cargar()
     }
 
-    private func conMargen(_ vista: UIView) -> UIView {
-        let contenedor = UIView()
-        vista.translatesAutoresizingMaskIntoConstraints = false
-        contenedor.addSubview(vista)
-        NSLayoutConstraint.activate([
-            vista.topAnchor.constraint(equalTo: contenedor.topAnchor),
-            vista.bottomAnchor.constraint(equalTo: contenedor.bottomAnchor),
-            vista.leadingAnchor.constraint(equalTo: contenedor.leadingAnchor, constant: 16),
-            vista.trailingAnchor.constraint(equalTo: contenedor.trailingAnchor, constant: -16)
-        ])
-        return contenedor
-    }
-
     /// Chips: "Todos" más cada usuario con rol Vendedor o con ventas registradas.
     private func actualizarVendedores() {
-        let anterior = chips.seleccion > 0 && chips.seleccion <= vendedores.count ? vendedores[chips.seleccion - 1] : nil
+        let anterior = seleccionDeChip > 0 && seleccionDeChip <= vendedores.count ? vendedores[seleccionDeChip - 1] : nil
         vendedores = BaseDatos.shared.buscar(
             Usuario.self,
             predicado: NSPredicate(format: "rol == %@ OR ventas.@count > 0", Rol.vendedor.rawValue),
             orden: [NSSortDescriptor(key: "nombre", ascending: true)]
         )
         let indice = anterior.flatMap { vendedores.firstIndex(of: $0) }.map { $0 + 1 } ?? 0
-        chips.configurar(opciones: ["Todos"] + vendedores.map { $0.nombre ?? "" }, seleccion: indice)
+        chips?.configurar(opciones: ["Todos"] + vendedores.map { $0.nombre ?? "" }, seleccion: indice)
     }
 
-    @objc private func filtroCambio() {
+    /// Value Changed del segmented Todas / Hoy / Mes.
+    @IBAction private func filtroCambio() {
         cargar()
     }
 
@@ -115,8 +67,8 @@ final class VentasViewController: UIViewController {
                 condiciones.append(NSPredicate(format: "vendedor == %@", usuario))
             }
         case .equipo:
-            if chips.seleccion > 0 && chips.seleccion <= vendedores.count {
-                condiciones.append(NSPredicate(format: "vendedor == %@", vendedores[chips.seleccion - 1]))
+            if seleccionDeChip > 0 && seleccionDeChip <= vendedores.count {
+                condiciones.append(NSPredicate(format: "vendedor == %@", vendedores[seleccionDeChip - 1]))
             }
         }
 
@@ -126,7 +78,7 @@ final class VentasViewController: UIViewController {
         default: break
         }
 
-        let texto = (buscador.searchBar.text ?? "").trimmingCharacters(in: .whitespaces)
+        let texto = (buscador.text ?? "").trimmingCharacters(in: .whitespaces)
         if !texto.isEmpty {
             condiciones.append(NSPredicate(format: "cliente.nombre CONTAINS[cd] %@", texto))
         }
@@ -145,22 +97,20 @@ final class VentasViewController: UIViewController {
         guard let usuario = Sesion.shared.usuario else { return }
         let hoy = BaseDatos.shared.ventasValidas(desde: Fechas.inicioDelDia(), vendedor: usuario)
         let mes = BaseDatos.shared.ventasValidas(desde: Fechas.inicioDelMes(), vendedor: usuario)
-        indicadorHoy.valor.text = Formato.soles(hoy.reduce(0) { $0 + $1.total })
-        indicadorHoy.detalle.text = "\(hoy.count) venta(s)"
-        indicadorMes.valor.text = Formato.soles(mes.reduce(0) { $0 + $1.total })
-        indicadorMes.detalle.text = "\(mes.count) venta(s)"
+        indicadorHoy?.valor.text = Formato.soles(hoy.reduce(0) { $0 + $1.total })
+        indicadorHoy?.detalle.text = "\(hoy.count) venta(s)"
+        indicadorMes?.valor.text = Formato.soles(mes.reduce(0) { $0 + $1.total })
+        indicadorMes?.detalle.text = "\(mes.count) venta(s)"
     }
 
     // MARK: - A8 · Anular con motivo
 
     private func pedirAnulacion(de venta: Venta) {
+        // A8 ① · Resumen de la venta y aviso de que el stock se devolverá.
         let mensaje = """
-        Cliente: \(venta.cliente?.nombre ?? "")
-        Producto: \(venta.producto?.nombre ?? "") × \(venta.cantidad)
+        \(venta.cliente?.nombre ?? "") · \(venta.producto?.nombre ?? "") × \(venta.cantidad) · \(Formato.soles(venta.total))
         Vendedor: \(venta.vendedor?.nombre ?? "")
-        Total: \(Formato.soles(venta.total))
-
-        Se devolverán \(venta.cantidad) unidad(es) al stock.
+        El stock se devolverá (+\(venta.cantidad)).
         """
         let alerta = UIAlertController(title: "Anular venta", message: mensaje, preferredStyle: .alert)
         let anular = UIAlertAction(title: "Anular", style: .destructive) { [weak self, weak alerta] _ in
@@ -170,7 +120,7 @@ final class VentasViewController: UIViewController {
         // Deshabilitado mientras el motivo esté vacío.
         anular.isEnabled = false
         alerta.addTextField { campo in
-            campo.placeholder = "Motivo (obligatorio)"
+            campo.placeholder = "Motivo (obligatorio)"   // A8 ②
             campo.autocapitalizationType = .sentences
             campo.addAction(UIAction { _ in
                 anular.isEnabled = !(campo.text ?? "").trimmingCharacters(in: .whitespaces).isEmpty
@@ -209,8 +159,8 @@ extension VentasViewController: UITableViewDataSource, UITableViewDelegate {
 
     func tableView(_ tableView: UITableView, titleForFooterInSection section: Int) -> String? {
         modo == .equipo
-            ? "El nombre del vendedor sale de la relación venta ▸ vendedor. Desliza una venta para anularla."
-            : nil
+            ? "El nombre del vendedor se lee de la relación venta ▸ vendedor. Desliza una venta para anularla."
+            : "Solo aparecen las ventas de este vendedor."
     }
 
     /// Solo el supervisor, en Ventas del equipo, y solo si la venta no está anulada.
@@ -227,81 +177,61 @@ extension VentasViewController: UITableViewDataSource, UITableViewDelegate {
     }
 }
 
-extension VentasViewController: UISearchResultsUpdating {
-    func updateSearchResults(for searchController: UISearchController) {
+extension VentasViewController: UISearchBarDelegate {
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         cargar()
+    }
+
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        searchBar.resignFirstResponder()
     }
 }
 
 /// Fila de una venta. Las anuladas salen tachadas y con la etiqueta ANULADA.
+/// Es la celda prototipo "venta" de las dos escenas de ventas en Main.storyboard.
 final class VentaCelda: UITableViewCell {
     static let id = "venta"
 
-    private let titulo = UILabel()
-    private let detalle = UILabel()
-    private let total = UILabel()
-    private let etiqueta = UILabel()
+    @IBOutlet private weak var icono: Iniciales!
+    @IBOutlet private weak var titulo: UILabel!
+    @IBOutlet private weak var detalle: UILabel!
+    @IBOutlet private weak var total: UILabel!
+    @IBOutlet private weak var etiqueta: Pastilla!
 
-    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
-        super.init(style: style, reuseIdentifier: reuseIdentifier)
-        selectionStyle = .none
-        detalle.font = .preferredFont(forTextStyle: .caption1)
-        detalle.textColor = .secondaryLabel
-        detalle.numberOfLines = 0
-        total.font = .systemFont(ofSize: 16, weight: .bold)
-        total.textAlignment = .right
-        total.setContentCompressionResistancePriority(.required, for: .horizontal)
-        etiqueta.text = " ANULADA "
-        etiqueta.font = .systemFont(ofSize: 11, weight: .bold)
-        etiqueta.textColor = .white
-        etiqueta.backgroundColor = .systemRed
-        etiqueta.layer.cornerRadius = 4
-        etiqueta.clipsToBounds = true
+    private static let diaMes: DateFormatter = {
+        let f = DateFormatter()
+        f.dateFormat = "dd/MM"
+        return f
+    }()
 
-        let izquierda = UIStackView(arrangedSubviews: [titulo, detalle])
-        izquierda.axis = .vertical
-        izquierda.spacing = 3
-        let derecha = UIStackView(arrangedSubviews: [total, etiqueta])
-        derecha.axis = .vertical
-        derecha.alignment = .trailing
-        derecha.spacing = 4
-        let fila = UIStackView(arrangedSubviews: [izquierda, derecha])
-        fila.spacing = 10
-        fila.alignment = .center
-        fila.translatesAutoresizingMaskIntoConstraints = false
-        contentView.addSubview(fila)
-        NSLayoutConstraint.activate([
-            fila.leadingAnchor.constraint(equalTo: contentView.layoutMarginsGuide.leadingAnchor),
-            fila.trailingAnchor.constraint(equalTo: contentView.layoutMarginsGuide.trailingAnchor),
-            fila.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 10),
-            fila.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -10)
-        ])
-    }
-
-    required init?(coder: NSCoder) { fatalError("init(coder:) no se usa") }
-
+    /// A6: ícono ✓ / ✕ y "fecha · producto × cantidad".
+    /// A7: iniciales del cliente y "vendedor · producto × cantidad" (relación venta ▸ vendedor).
     func configurar(con venta: Venta, mostrarVendedor: Bool) {
-        let textoTitulo = "\(venta.cliente?.nombre ?? "Sin cliente")"
-        var lineas = ["\(venta.producto?.nombre ?? "") × \(venta.cantidad) · \(Formato.fecha(venta.fecha))"]
+        let producto = "\(venta.producto?.nombre ?? "") × \(venta.cantidad)"
+        var lineas: [String]
         if mostrarVendedor {
-            lineas.append("Vendedor: \(venta.vendedor?.nombre ?? "-")")
-        }
-        if venta.descuento > 0 {
-            lineas.append("Descuento VIP \(Formato.soles(venta.descuento))")
+            let vendedor = venta.vendedor?.nombre?.split(separator: " ").first.map(String.init) ?? "-"
+            lineas = ["\(vendedor) · \(producto)"]
+            icono.mostrar(nombre: venta.cliente?.nombre)
+        } else {
+            let fecha = venta.fecha.map { VentaCelda.diaMes.string(from: $0) } ?? ""
+            lineas = ["\(fecha) · \(producto)"]
+            icono.mostrar(venta.anulada ? "✕" : "✓", color: venta.anulada ? .systemRed : .systemGreen)
         }
         if venta.anulada, let motivo = venta.motivoAnulacion {
             lineas.append("Motivo: \(motivo)")
         }
 
+        // A6 ⑤ · Venta anulada: tachada y con la etiqueta, sin botón.
         let tachado: [NSAttributedString.Key: Any] = venta.anulada
             ? [.strikethroughStyle: NSUnderlineStyle.single.rawValue, .foregroundColor: UIColor.secondaryLabel]
             : [.foregroundColor: UIColor.label]
         titulo.attributedText = NSAttributedString(
-            string: textoTitulo,
-            attributes: tachado.merging([.font: UIFont.systemFont(ofSize: 16, weight: .semibold)]) { $1 })
+            string: venta.cliente?.nombre ?? "Sin cliente",
+            attributes: tachado.merging([.font: UIFont.systemFont(ofSize: 15, weight: .semibold)]) { $1 })
         total.attributedText = NSAttributedString(
             string: Formato.soles(venta.total),
-            attributes: tachado.merging([.font: UIFont.systemFont(ofSize: 16, weight: .bold)]) { $1 })
+            attributes: tachado.merging([.font: UIFont.systemFont(ofSize: 15, weight: .bold)]) { $1 })
         detalle.text = lineas.joined(separator: "\n")
         etiqueta.isHidden = !venta.anulada
     }

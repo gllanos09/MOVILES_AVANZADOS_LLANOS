@@ -1,21 +1,22 @@
 import UIKit
 
 /// A5 · Registrar venta. El vendedor sale de la sesión; el resumen se calcula con Reglas.
+/// Las tarjetas (vendedor de la sesión, cliente, producto, cantidad y resumen) están en Main.storyboard.
 final class NuevaVentaViewController: UIViewController {
 
-    private let vendedorEtiqueta = UILabel()
-    private let clienteBoton = UIButton(type: .system)
-    private let clienteDetalle = UILabel()
-    private let productoBoton = UIButton(type: .system)
-    private let productoDetalle = UILabel()
-    private let cantidadCampo = UITextField()
-    private let cantidadStepper = UIStepper()
+    @IBOutlet private weak var vendedorIniciales: Iniciales!
+    @IBOutlet private weak var vendedorEtiqueta: UILabel!
+    @IBOutlet private weak var clienteBoton: UIButton!
+    @IBOutlet private weak var productoBoton: UIButton!
+    @IBOutlet private weak var productoDetalle: UILabel!   // "(stock 40)" junto a la cantidad
+    @IBOutlet private weak var cantidadCampo: UITextField!
+    @IBOutlet private weak var cantidadStepper: UIStepper!
 
-    private let subtotalValor = UILabel()
-    private let descuentoTitulo = UILabel()
-    private let descuentoValor = UILabel()
-    private let igvValor = UILabel()
-    private let totalValor = UILabel()
+    @IBOutlet private weak var subtotalValor: UILabel!
+    @IBOutlet private weak var descuentoTitulo: UILabel!
+    @IBOutlet private weak var descuentoValor: UILabel!
+    @IBOutlet private weak var igvValor: UILabel!
+    @IBOutlet private weak var totalValor: UILabel!
 
     private var clienteElegido: Cliente?
     private var productoElegido: Producto?
@@ -26,54 +27,9 @@ final class NuevaVentaViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .systemBackground
-
-        vendedorEtiqueta.font = .systemFont(ofSize: 16, weight: .semibold)
-        let vendedorFila = tarjeta(titulo: "Vendedor (sesión)", contenido: [vendedorEtiqueta])
-
-        configurarSelector(clienteBoton, texto: "Elegir cliente")
-        clienteDetalle.font = .preferredFont(forTextStyle: .caption1)
-        clienteDetalle.textColor = .secondaryLabel
-        let clienteFila = tarjeta(titulo: "Cliente", contenido: [clienteBoton, clienteDetalle])
-
-        configurarSelector(productoBoton, texto: "Elegir producto")
-        productoDetalle.font = .preferredFont(forTextStyle: .caption1)
-        productoDetalle.textColor = .secondaryLabel
-        productoDetalle.numberOfLines = 0
-        let productoFila = tarjeta(titulo: "Producto", contenido: [productoBoton, productoDetalle])
-
-        cantidadCampo.text = "1"
-        cantidadCampo.keyboardType = .numberPad
-        cantidadCampo.font = .systemFont(ofSize: 22, weight: .bold)
-        cantidadCampo.borderStyle = .roundedRect
-        cantidadCampo.textAlignment = .center
-        cantidadCampo.widthAnchor.constraint(equalToConstant: 80).isActive = true
-        cantidadCampo.addTarget(self, action: #selector(cantidadEscrita), for: .editingChanged)
-        cantidadStepper.minimumValue = 1
-        cantidadStepper.maximumValue = 999
-        cantidadStepper.value = 1
-        cantidadStepper.addTarget(self, action: #selector(stepperCambio), for: .valueChanged)
-        let cantidadFila = UIStackView(arrangedSubviews: [cantidadCampo, UIView(), cantidadStepper])
-        cantidadFila.alignment = .center
-        let cantidadTarjeta = tarjeta(titulo: "Cantidad", contenido: [cantidadFila])
-
-        totalValor.font = .systemFont(ofSize: 20, weight: .bold)
-        descuentoTitulo.text = "Descuento"
-        let resumen = tarjeta(titulo: "Resumen", contenido: [
-            filaMonto("Subtotal", subtotalValor),
-            filaMonto(descuentoTitulo, descuentoValor),
-            filaMonto("IGV (18 %)", igvValor),
-            filaMonto("Total", totalValor, destacado: true)
-        ])
-
-        let registrar = UIButton.principal("Registrar venta")
-        registrar.addTarget(self, action: #selector(registrarTocado), for: .touchUpInside)
-
-        let pila = UIStackView(arrangedSubviews: [vendedorFila, clienteFila, productoFila,
-                                                  cantidadTarjeta, resumen, registrar])
-        pila.axis = .vertical
-        pila.spacing = 12
-        view.fijarEnScroll(pila, margen: 16)
+        // Los botones Cliente y Producto abren su menú con un solo toque.
+        clienteBoton.showsMenuAsPrimaryAction = true
+        productoBoton.showsMenuAsPrimaryAction = true
 
         // Cierra el teclado numérico al tocar fuera.
         let toque = UITapGestureRecognizer(target: view, action: #selector(UIView.endEditing(_:)))
@@ -83,19 +39,14 @@ final class NuevaVentaViewController: UIViewController {
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        vendedorEtiqueta.text = Sesion.shared.usuario?.nombre
+        let vendedor = Sesion.shared.usuario
+        vendedorIniciales.mostrar(nombre: vendedor?.nombre)
+        vendedorEtiqueta.text = "\(vendedor?.nombre ?? "") · \(vendedor?.rol ?? "")"
         armarMenus()
         actualizarResumen()
     }
 
     // MARK: - Selectores
-
-    private func configurarSelector(_ boton: UIButton, texto: String) {
-        boton.setTitle(texto, for: .normal)
-        boton.contentHorizontalAlignment = .leading
-        boton.titleLabel?.font = .systemFont(ofSize: 17, weight: .semibold)
-        boton.showsMenuAsPrimaryAction = true
-    }
 
     /// Menús con los clientes y productos actuales (pueden cambiar en otras pestañas).
     private func armarMenus() {
@@ -127,12 +78,14 @@ final class NuevaVentaViewController: UIViewController {
 
     // MARK: - Cantidad
 
-    @objc private func stepperCambio() {
+    /// Value Changed del stepper.
+    @IBAction private func stepperCambio() {
         cantidadCampo.text = String(Int(cantidadStepper.value))
         actualizarResumen()
     }
 
-    @objc private func cantidadEscrita() {
+    /// Editing Changed del campo cantidad.
+    @IBAction private func cantidadEscrita() {
         cantidadStepper.value = Double(max(cantidad, 1))
         actualizarResumen()
     }
@@ -141,25 +94,23 @@ final class NuevaVentaViewController: UIViewController {
 
     private func actualizarResumen() {
         if let cliente = clienteElegido {
-            clienteBoton.setTitle(cliente.nombre, for: .normal)
-            clienteDetalle.text = "\(cliente.documento ?? "") · \(cliente.categoria.rawValue) · comprado \(Formato.soles(cliente.totalComprado))"
+            clienteBoton.setTitle("\(cliente.nombre ?? "") ›", for: .normal)
         } else {
-            clienteBoton.setTitle("Elegir cliente", for: .normal)
-            clienteDetalle.text = "Toca para elegir"
+            clienteBoton.setTitle("Elegir ›", for: .normal)
         }
 
         if let producto = productoElegido {
-            productoBoton.setTitle(producto.nombre, for: .normal)
-            productoDetalle.text = "\(Formato.soles(producto.precio)) c/u · Stock disponible: \(producto.stock)"
+            productoBoton.setTitle("\(producto.nombre ?? "") ›", for: .normal)
+            productoDetalle.text = "(stock \(producto.stock))"
             productoDetalle.textColor = Int64(cantidad) > producto.stock ? .systemRed : .secondaryLabel
         } else {
-            productoBoton.setTitle("Elegir producto", for: .normal)
-            productoDetalle.text = "Toca para elegir"
+            productoBoton.setTitle("Elegir ›", for: .normal)
+            productoDetalle.text = ""
             productoDetalle.textColor = .secondaryLabel
         }
 
         let categoria = clienteElegido?.categoria ?? .regular
-        descuentoTitulo.text = categoria == .vip ? "Descuento VIP (10 %)" : "Descuento"
+        descuentoTitulo.text = categoria == .vip ? "Descuento VIP 10%" : "Descuento"
         guard let producto = productoElegido, cantidad > 0 else {
             [subtotalValor, descuentoValor, igvValor, totalValor].forEach { $0.text = Formato.soles(0) }
             return
@@ -173,7 +124,7 @@ final class NuevaVentaViewController: UIViewController {
 
     // MARK: - Registrar
 
-    @objc private func registrarTocado() {
+    @IBAction private func registrarTocado() {
         view.endEditing(true)
         guard let vendedor = Sesion.shared.usuario else { return }
         guard let cliente = clienteElegido else {
@@ -218,34 +169,5 @@ final class NuevaVentaViewController: UIViewController {
             self?.armarMenus()
             self?.actualizarResumen()
         }
-    }
-
-    // MARK: - Piezas de la pantalla
-
-    private func tarjeta(titulo: String, contenido: [UIView]) -> UIView {
-        let etiqueta = UILabel()
-        etiqueta.text = titulo.uppercased()
-        etiqueta.font = .systemFont(ofSize: 12, weight: .semibold)
-        etiqueta.textColor = .secondaryLabel
-        let pila = UIStackView(arrangedSubviews: [etiqueta] + contenido)
-        pila.axis = .vertical
-        pila.spacing = 6
-        pila.isLayoutMarginsRelativeArrangement = true
-        pila.layoutMargins = UIEdgeInsets(top: 12, left: 14, bottom: 12, right: 14)
-        pila.backgroundColor = .secondarySystemBackground
-        pila.layer.cornerRadius = 12
-        return pila
-    }
-
-    private func filaMonto(_ titulo: String, _ valor: UILabel, destacado: Bool = false) -> UIView {
-        let etiqueta = UILabel()
-        etiqueta.text = titulo
-        return filaMonto(etiqueta, valor, destacado: destacado)
-    }
-
-    private func filaMonto(_ etiqueta: UILabel, _ valor: UILabel, destacado: Bool = false) -> UIView {
-        if destacado { etiqueta.font = .systemFont(ofSize: 20, weight: .bold) }
-        valor.textAlignment = .right
-        return UIStackView(arrangedSubviews: [etiqueta, valor])
     }
 }

@@ -23,6 +23,7 @@
 		C11A00302B00000100C0FFEE /* ResumenViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C11A002F2B00000100C0FFEE /* ResumenViewController.swift */; };
 		C11A00322B00000100C0FFEE /* CuentaViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C11A00312B00000100C0FFEE /* CuentaViewController.swift */; };
 		C11A00112B00000100C0FFEE /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C11A00102B00000100C0FFEE /* Assets.xcassets */; };
+		C11A00342B00000100C0FFEE /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C11A00332B00000100C0FFEE /* Main.storyboard */; };
 		C11A00132B00000100C0FFEE /* Ventas.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = C11A00122B00000100C0FFEE /* Ventas.xcdatamodeld */; };
 /* End PBXBuildFile section */
 
@@ -44,6 +45,7 @@
 		C11A002F2B00000100C0FFEE /* ResumenViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResumenViewController.swift; sourceTree = "<group>"; };
 		C11A00312B00000100C0FFEE /* CuentaViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CuentaViewController.swift; sourceTree = "<group>"; };
 		C11A00102B00000100C0FFEE /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		C11A00352B00000100C0FFEE /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		C11A00142B00000100C0FFEE /* Ventas.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Ventas.xcdatamodel; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -92,6 +94,7 @@
 				C11A002D2B00000100C0FFEE /* VentasViewController.swift */,
 				C11A002F2B00000100C0FFEE /* ResumenViewController.swift */,
 				C11A00312B00000100C0FFEE /* CuentaViewController.swift */,
+				C11A00332B00000100C0FFEE /* Main.storyboard */,
 				C11A00122B00000100C0FFEE /* Ventas.xcdatamodeld */,
 				C11A00102B00000100C0FFEE /* Assets.xcassets */,
 			);
@@ -156,6 +159,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C11A00342B00000100C0FFEE /* Main.storyboard in Resources */,
 				C11A00112B00000100C0FFEE /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -187,6 +191,17 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		C11A00332B00000100C0FFEE /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				C11A00352B00000100C0FFEE /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		C11A000B2B00000100C0FFEE /* Debug */ = {

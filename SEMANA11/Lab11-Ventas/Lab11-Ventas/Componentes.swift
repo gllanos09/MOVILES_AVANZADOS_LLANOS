@@ -1,6 +1,8 @@
 import UIKit
 
 /// Fila horizontal de chips seleccionables (categorías, vendedores).
+/// En Main.storyboard se coloca como una vista con la clase ChipsView y alto 46;
+/// los botones se crean aquí porque dependen de los datos.
 final class ChipsView: UIScrollView {
     private let fila = UIStackView()
     private var botones: [UIButton] = []
@@ -9,6 +11,15 @@ final class ChipsView: UIScrollView {
 
     override init(frame: CGRect) {
         super.init(frame: frame)
+        prepararFila()
+    }
+
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+        prepararFila()
+    }
+
+    private func prepararFila() {
         showsHorizontalScrollIndicator = false
         fila.axis = .horizontal
         fila.spacing = 8
@@ -19,12 +30,9 @@ final class ChipsView: UIScrollView {
             fila.trailingAnchor.constraint(equalTo: contentLayoutGuide.trailingAnchor, constant: -16),
             fila.topAnchor.constraint(equalTo: contentLayoutGuide.topAnchor, constant: 6),
             fila.bottomAnchor.constraint(equalTo: contentLayoutGuide.bottomAnchor, constant: -6),
-            fila.heightAnchor.constraint(equalTo: frameLayoutGuide.heightAnchor, constant: -12),
-            heightAnchor.constraint(equalToConstant: 46)
+            fila.heightAnchor.constraint(equalTo: frameLayoutGuide.heightAnchor, constant: -12)
         ])
     }
-
-    required init?(coder: NSCoder) { fatalError("init(coder:) no se usa") }
 
     func configurar(opciones: [String], seleccion: Int = 0) {
         botones.forEach { $0.removeFromSuperview() }
@@ -59,43 +67,96 @@ final class ChipsView: UIScrollView {
 }
 
 /// Tarjeta con un título pequeño, un valor grande y un detalle.
+/// Las tres etiquetas se dibujan en Main.storyboard y se conectan a estos outlets.
 final class IndicadorView: UIView {
-    let titulo = UILabel()
-    let valor = UILabel()
-    let detalle = UILabel()
+    @IBOutlet weak var titulo: UILabel!
+    @IBOutlet weak var valor: UILabel!
+    @IBOutlet weak var detalle: UILabel!
+}
 
-    init(titulo texto: String) {
-        super.init(frame: .zero)
-        backgroundColor = .secondarySystemBackground
-        layer.cornerRadius = 12
+/// Cuadro de color con iniciales (productos, clientes, vendedor). El color sale del texto,
+/// así cada nombre conserva siempre el mismo color.
+final class Iniciales: UILabel {
+    private static let colores: [UIColor] = [.systemBlue, .systemPurple, .systemTeal, .systemOrange,
+                                              .systemPink, .systemIndigo, .systemGreen, .systemBrown]
 
-        titulo.text = texto
-        titulo.font = .preferredFont(forTextStyle: .caption1)
-        titulo.textColor = .secondaryLabel
-        valor.font = .systemFont(ofSize: 20, weight: .bold)
-        valor.adjustsFontSizeToFitWidth = true
-        valor.minimumScaleFactor = 0.6
-        detalle.font = .preferredFont(forTextStyle: .caption1)
-        detalle.textColor = .secondaryLabel
-        detalle.numberOfLines = 2
-
-        let pila = UIStackView(arrangedSubviews: [titulo, valor, detalle])
-        pila.axis = .vertical
-        pila.spacing = 4
-        pila.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(pila)
-        NSLayoutConstraint.activate([
-            pila.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 12),
-            pila.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -12),
-            pila.topAnchor.constraint(equalTo: topAnchor, constant: 10),
-            pila.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -10)
-        ])
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        layer.cornerRadius = min(bounds.width, bounds.height) * 0.25
+        layer.masksToBounds = true
     }
 
-    required init?(coder: NSCoder) { fatalError("init(coder:) no se usa") }
+    /// Muestra las iniciales de un nombre ("Laptop Pro 14" → "LP").
+    func mostrar(nombre: String?) {
+        let texto = Iniciales.de(nombre)
+        mostrar(texto, color: Iniciales.color(para: nombre ?? texto))
+    }
+
+    func mostrar(_ texto: String, color: UIColor) {
+        text = texto
+        backgroundColor = color
+    }
+
+    /// "Laptop Pro 14" → "LP"; una sola palabra ("Mouse") → "MO".
+    static func de(_ nombre: String?) -> String {
+        let partes = (nombre ?? "").split(separator: " ")
+        if partes.count == 1, let unica = partes.first { return String(unica.prefix(2)).uppercased() }
+        return partes.prefix(2).compactMap { $0.first.map(String.init) }.joined().uppercased()
+    }
+
+    static func color(para texto: String) -> UIColor {
+        let suma = texto.unicodeScalars.reduce(0) { $0 + Int($1.value) }
+        return colores[suma % colores.count]
+    }
+}
+
+/// Etiqueta en forma de pastilla (stock, categoría, "Anulada", "Reponer", rol).
+final class Pastilla: UILabel {
+    private let relleno = UIEdgeInsets(top: 2, left: 8, bottom: 2, right: 8)
+
+    override func drawText(in rect: CGRect) {
+        super.drawText(in: rect.inset(by: relleno))
+    }
+
+    override var intrinsicContentSize: CGSize {
+        let base = super.intrinsicContentSize
+        return CGSize(width: base.width + relleno.left + relleno.right,
+                      height: base.height + relleno.top + relleno.bottom)
+    }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        layer.cornerRadius = bounds.height / 2
+        layer.masksToBounds = true
+    }
+
+    func pintar(_ texto: String, _ color: UIColor) {
+        text = texto
+        backgroundColor = color
+    }
 }
 
 extension UIViewController {
+    /// Botón con las iniciales del usuario de la sesión (arriba a la derecha en A6 y A7).
+    /// Al tocarlo se abre la pestaña Cuenta.
+    func ponerBotonDeCuenta() {
+        let boton = UIButton(type: .system)
+        let nombre = Sesion.shared.usuario?.nombre
+        boton.setTitle(Iniciales.de(nombre), for: .normal)
+        boton.titleLabel?.font = .systemFont(ofSize: 13, weight: .bold)
+        boton.setTitleColor(.white, for: .normal)
+        boton.backgroundColor = Iniciales.color(para: nombre ?? "")
+        boton.layer.cornerRadius = 15
+        boton.widthAnchor.constraint(equalToConstant: 30).isActive = true
+        boton.heightAnchor.constraint(equalToConstant: 30).isActive = true
+        boton.addAction(UIAction { [weak self] _ in
+            guard let tab = self?.tabBarController,
+                  let indice = tab.viewControllers?.firstIndex(where: { $0.tabBarItem.title == "Cuenta" }) else { return }
+            tab.selectedIndex = indice
+        }, for: .touchUpInside)
+        navigationItem.rightBarButtonItem = UIBarButtonItem(customView: boton)
+    }
+
     func mostrarAlerta(_ titulo: String, _ mensaje: String, alCerrar: (() -> Void)? = nil) {
         let alerta = UIAlertController(title: titulo, message: mensaje, preferredStyle: .alert)
         alerta.addAction(UIAlertAction(title: "Aceptar", style: .default) { _ in alCerrar?() })
@@ -123,57 +184,5 @@ extension UIViewController {
             alGuardar(valores)
         })
         present(alerta, animated: true)
-    }
-}
-
-extension UITextField {
-    /// Campo con fondo gris y bordes redondeados, usado en login, registro y venta.
-    static func campo(_ placeholder: String, seguro: Bool = false) -> UITextField {
-        let campo = UITextField()
-        campo.placeholder = placeholder
-        campo.isSecureTextEntry = seguro
-        campo.autocapitalizationType = .none
-        campo.autocorrectionType = .no
-        campo.backgroundColor = .secondarySystemBackground
-        campo.layer.cornerRadius = 10
-        campo.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 12, height: 1))
-        campo.leftViewMode = .always
-        campo.heightAnchor.constraint(equalToConstant: 46).isActive = true
-        return campo
-    }
-}
-
-extension UIButton {
-    static func principal(_ titulo: String) -> UIButton {
-        let boton = UIButton(type: .system)
-        boton.setTitle(titulo, for: .normal)
-        boton.titleLabel?.font = .systemFont(ofSize: 17, weight: .semibold)
-        boton.backgroundColor = .tintColor
-        boton.setTitleColor(.white, for: .normal)
-        boton.layer.cornerRadius = 12
-        boton.heightAnchor.constraint(equalToConstant: 50).isActive = true
-        return boton
-    }
-}
-
-extension UIView {
-    /// Pone la vista dentro de un scroll que ocupa toda la pantalla, con márgenes.
-    func fijarEnScroll(_ contenido: UIView, margen: CGFloat = 20) {
-        let scroll = UIScrollView()
-        scroll.keyboardDismissMode = .interactive
-        scroll.translatesAutoresizingMaskIntoConstraints = false
-        contenido.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(scroll)
-        scroll.addSubview(contenido)
-        NSLayoutConstraint.activate([
-            scroll.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor),
-            scroll.bottomAnchor.constraint(equalTo: bottomAnchor),
-            scroll.leadingAnchor.constraint(equalTo: leadingAnchor),
-            scroll.trailingAnchor.constraint(equalTo: trailingAnchor),
-            contenido.topAnchor.constraint(equalTo: scroll.contentLayoutGuide.topAnchor, constant: margen),
-            contenido.bottomAnchor.constraint(equalTo: scroll.contentLayoutGuide.bottomAnchor, constant: -margen),
-            contenido.leadingAnchor.constraint(equalTo: scroll.frameLayoutGuide.leadingAnchor, constant: margen),
-            contenido.trailingAnchor.constraint(equalTo: scroll.frameLayoutGuide.trailingAnchor, constant: -margen)
-        ])
     }
 }

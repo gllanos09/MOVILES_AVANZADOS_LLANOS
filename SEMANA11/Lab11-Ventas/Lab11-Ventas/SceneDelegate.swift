@@ -4,6 +4,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     var window: UIWindow?
 
+    private let storyboard = UIStoryboard(name: "Main", bundle: nil)
+
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession,
                options connectionOptions: UIScene.ConnectionOptions) {
         guard let windowScene = scene as? UIWindowScene else { return }
@@ -12,10 +14,11 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         mostrarLogin()
     }
 
-    /// Pantalla inicial: el login dentro de una navegación (para ir a Crear cuenta).
+    /// Pantalla inicial: el login de Main.storyboard (la escena con la flecha de inicio)
+    /// dentro de una navegación, para que el segue a Crear cuenta pueda apilarse.
     func mostrarLogin() {
-        let navegacion = UINavigationController(rootViewController: LoginViewController())
-        cambiarRaiz(navegacion)
+        guard let login = storyboard.instantiateInitialViewController() else { return }
+        cambiarRaiz(UINavigationController(rootViewController: login))
     }
 
     /// Al entrar, se abre el UITabBarController con las pestañas del rol.

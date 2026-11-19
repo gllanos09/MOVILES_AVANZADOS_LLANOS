@@ -1,7 +1,7 @@
 # Lab 11 · Grupo A · Caso Ventas (UIKit + Core Data)
 
 App de una tienda que registra productos, clientes y ventas, con inicio de sesión
-y dos roles: **Vendedor** y **Supervisor**. Hecha en UIKit (sin storyboard) con Core Data.
+y dos roles: **Vendedor** y **Supervisor**. Hecha en UIKit con **Main.storyboard** y Core Data.
 
 - Proyecto: `Lab11-Ventas/Lab11-Ventas.xcodeproj`
 - Xcode 14.2, iOS 16.0 o superior, probado en el simulador iPhone SE (3.ª generación)
@@ -43,20 +43,24 @@ usuario que tiene ventas. La app deshace el cambio (`rollback`) y muestra una al
 | Ventas | Registrar y ver solo las suyas | Ver todas, filtrar por vendedor y anular con motivo |
 | Resumen | No lo ve | Indicadores, gráfico de 7 días y ranking |
 
-## Pantallas
+## Pantallas (Main.storyboard)
 
-| Pant. | Archivo | Qué hace |
-|---|---|---|
-| A1 | `LoginViewController` | Usuario y clave; error genérico "Usuario o clave incorrectos" |
-| A2 | `RegistroViewController` | Usuario único sin distinguir mayúsculas, clave de mínimo 6 caracteres con confirmación, rol; entra directo |
-| A3 | `ProductosViewController` | Búsqueda, chips de categoría, stock en color, deslizar para borrar (supervisor) |
-| A4 | `ClientesViewController` | Iniciales, documento, total comprado y categoría calculada |
-| A5 | `NuevaVentaViewController` | Vendedor de la sesión, cliente, producto, cantidad con stepper y resumen calculado |
-| A6 | `VentasViewController` (modo propias) | Indicadores de hoy y del mes, Todas/Hoy/Mes, búsqueda; anuladas tachadas |
-| A7 | `VentasViewController` (modo equipo) | Chips por vendedor y deslizar para anular |
-| A8 | Alerta en `VentasViewController` | Resumen de la venta, motivo obligatorio, Anular deshabilitado sin motivo |
-| A9 | `ResumenViewController` | Saludo, indicadores contra ayer, gráfico de 7 días, ranking del mes, stock bajo |
-| — | `CuentaViewController` | Nombre, usuario, rol y Cerrar sesión |
+Cada pantalla de la maqueta es una escena de `Base.lproj/Main.storyboard` con su Storyboard ID.
+El login es la escena inicial; `TabBarController` arma las pestañas del rol instanciando
+las escenas por su ID.
+
+| Pant. | Storyboard ID | Clase | Qué hace |
+|---|---|---|---|
+| A1 | `Login` (inicial) | `LoginViewController` | Usuario y clave; error genérico "Usuario o clave incorrectos"; segue a Crear cuenta |
+| A2 | `Registro` | `RegistroViewController` | Usuario único con aviso "✓ Disponible / Ya existe", clave de mínimo 6 con confirmación, rol; entra directo |
+| A3 | `Productos` | `ProductosViewController` | Búsqueda, chips de categoría, stock en color, deslizar para borrar (supervisor) |
+| A4 | `Clientes` | `ClientesViewController` | Iniciales, documento, total comprado y categoría calculada |
+| A5 | `NuevaVenta` | `NuevaVentaViewController` | Vendedor de la sesión, cliente, producto, cantidad con stepper y resumen calculado |
+| A6 | `MisVentas` | `VentasViewController` | Indicadores de hoy y del mes, Todas/Hoy/Mes, búsqueda; anuladas tachadas |
+| A7 | `VentasEquipo` | `VentasViewController` (Es Equipo = On) | Chips por vendedor y deslizar para anular |
+| A8 | — (alerta sobre A7) | `VentasViewController` | Resumen de la venta, motivo obligatorio, Anular deshabilitado sin motivo |
+| A9 | `Resumen` | `ResumenViewController` | Saludo, vendido hoy contra ayer, IGV del mes, gráfico de 7 días, ranking y stock bajo |
+| — | `Cuenta` | `CuentaViewController` | Nombre, usuario, rol y Cerrar sesión |
 
 La sesión es un objeto compartido (`Sesion.shared`) con el usuario conectado. Cerrar sesión
 lo pone en `nil` y vuelve al login.

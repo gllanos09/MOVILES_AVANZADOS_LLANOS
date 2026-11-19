@@ -1,64 +1,44 @@
 import UIKit
 
 /// A2 · Crear cuenta. Al registrarse, la persona entra directo a la app.
+/// La pantalla está en Main.storyboard (se llega con un segue desde el login).
 final class RegistroViewController: UIViewController {
 
-    private let nombreCampo = UITextField.campo("Nombre completo")
-    private let usuarioCampo = UITextField.campo("Usuario")
-    private let avisoUsuario = UILabel()
-    private let claveCampo = UITextField.campo("Clave (mínimo 6 caracteres)", seguro: true)
-    private let confirmarCampo = UITextField.campo("Confirmar clave", seguro: true)
-    private let rolSelector = UISegmentedControl(items: Rol.allCases.map(\.rawValue))
-    private let errorEtiqueta = UILabel()
+    @IBOutlet private weak var pila: UIStackView!
+    @IBOutlet private weak var nombreCampo: UITextField!
+    @IBOutlet private weak var usuarioCampo: UITextField!
+    @IBOutlet private weak var avisoUsuario: UILabel!
+    @IBOutlet private weak var claveCampo: UITextField!
+    @IBOutlet private weak var confirmarCampo: UITextField!
+    @IBOutlet private weak var rolTitulo: UILabel!
+    @IBOutlet private weak var rolSelector: UISegmentedControl!
+    @IBOutlet private weak var errorEtiqueta: UILabel!
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        title = "Crear cuenta"
-        view.backgroundColor = .systemBackground
-
-        nombreCampo.autocapitalizationType = .words
         // Las claves se escriben a mano: sin sugerencias de contraseña del sistema.
         claveCampo.textContentType = .oneTimeCode
         confirmarCampo.textContentType = .oneTimeCode
 
-        avisoUsuario.font = .preferredFont(forTextStyle: .caption1)
-        avisoUsuario.textColor = .systemRed
-        avisoUsuario.isHidden = true
-        usuarioCampo.addTarget(self, action: #selector(usuarioCambio), for: .editingChanged)
-
-        rolSelector.selectedSegmentIndex = 0
-        let rolTitulo = UILabel()
-        rolTitulo.text = "Rol"
-        rolTitulo.font = .preferredFont(forTextStyle: .subheadline)
-
-        errorEtiqueta.textColor = .systemRed
-        errorEtiqueta.font = .preferredFont(forTextStyle: .footnote)
-        errorEtiqueta.numberOfLines = 0
-        errorEtiqueta.isHidden = true
-
-        let registrar = UIButton.principal("Registrarme")
-        registrar.addTarget(self, action: #selector(registrarTocado), for: .touchUpInside)
-
-        let pila = UIStackView(arrangedSubviews: [nombreCampo, usuarioCampo, avisoUsuario,
-                                                  claveCampo, confirmarCampo, rolTitulo, rolSelector,
-                                                  errorEtiqueta, registrar])
-        pila.axis = .vertical
-        pila.spacing = 12
-        pila.setCustomSpacing(4, after: usuarioCampo)
         pila.setCustomSpacing(6, after: rolTitulo)
         pila.setCustomSpacing(20, after: rolSelector)
-        view.fijarEnScroll(pila)
     }
 
-    /// Aviso en vivo si el usuario ya existe (sin distinguir mayúsculas).
-    @objc private func usuarioCambio() {
+    /// Aviso en vivo: "✓ Disponible" o "Ya existe" (sin distinguir mayúsculas).
+    /// Conectado al evento Editing Changed del campo Usuario.
+    @IBAction private func usuarioCambio() {
         let usuario = (usuarioCampo.text ?? "").trimmingCharacters(in: .whitespaces)
-        let repetido = !usuario.isEmpty && BaseDatos.shared.usuarioExiste(usuario)
-        avisoUsuario.text = "El usuario \"\(usuario)\" ya existe"
-        avisoUsuario.isHidden = !repetido
+        guard !usuario.isEmpty else {
+            avisoUsuario.isHidden = true
+            return
+        }
+        let repetido = BaseDatos.shared.usuarioExiste(usuario)
+        avisoUsuario.text = repetido ? "Ya existe" : "✓ Disponible"
+        avisoUsuario.textColor = repetido ? .systemRed : .systemGreen
+        avisoUsuario.isHidden = false
     }
 
-    @objc private func registrarTocado() {
+    @IBAction private func registrarTocado() {
         let nombre = (nombreCampo.text ?? "").trimmingCharacters(in: .whitespaces)
         let usuario = (usuarioCampo.text ?? "").trimmingCharacters(in: .whitespaces)
         let clave = claveCampo.text ?? ""
